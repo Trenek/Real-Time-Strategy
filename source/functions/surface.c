@@ -1,4 +1,7 @@
-#include "VulkanTools.h"
+#include <vulkan/vulkan.h>
+#include <GLFW/glfw3.h>
+
+#include "MY_ASSERT.h"
 
 VkSurfaceKHR createSurface(GLFWwindow *window, VkInstance instance) {
     VkSurfaceKHR surface = NULL;

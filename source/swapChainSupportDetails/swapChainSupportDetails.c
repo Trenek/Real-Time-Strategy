@@ -1,4 +1,5 @@
-#include <malloc.h>
+#include <myMalloc.h>
+#include <vulkan/vulkan.h>
 
 #include "swapChainSupportDetails.h"
 
@@ -16,4 +17,9 @@ struct SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, Vk
     vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &details.presentModeCount, details.presentModes);
 
     return details;
+}
+
+void freeSwapChainSupportDetails(struct SwapChainSupportDetails *this) {
+    free(this->formats);
+    free(this->presentModes);
 }

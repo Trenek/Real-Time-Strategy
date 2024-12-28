@@ -1,17 +1,11 @@
 #ifndef VULKAN_TOOLS
 #define VULKAN_TOOLS
 
-#include <assert.h>
-#include <stdlib.h>
-
-#ifdef NDEBUG
-    #define MY_ASSERT(x) if (!x) exit(0);
-#else
-    #define MY_ASSERT(x) assert(x)
-#endif
-
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+
+#include "model.h"
+#include "definitions.h"
 
 struct swapChain {
     VkImage *images;
@@ -29,27 +23,52 @@ struct VulkanTools {
     VkPhysicalDevice physicalDevice;
     VkQueue presentQueue;
     VkQueue graphicsQueue;
+    VkQueue transferQueue;
     VkDevice device;
 
     struct swapChain swapChain;
     VkImageView *swapChainImageViews;
 
     VkRenderPass renderPass;
-    VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
 
     VkFramebuffer *swapChainFramebuffers;
 
     VkCommandPool commandPool;
-    VkCommandBuffer commandBuffer;
+    VkCommandBuffer commandBuffer[MAX_FRAMES_IN_FLIGHT];
+    VkCommandPool transferCommandPool;
 
-    VkSemaphore imageAvailableSemaphore;
-    VkSemaphore renderFinishedSemaphore;
-    VkFence inFlightFence;
+    VkBuffer uniformBuffers[MAX_FRAMES_IN_FLIGHT];
+    VkDeviceMemory uniformBuffersMemory[MAX_FRAMES_IN_FLIGHT];
+    void *uniformBuffersMapped[MAX_FRAMES_IN_FLIGHT];
+
+    VkSemaphore imageAvailableSemaphore[MAX_FRAMES_IN_FLIGHT];
+    VkSemaphore renderFinishedSemaphore[MAX_FRAMES_IN_FLIGHT];
+    VkFence inFlightFence[MAX_FRAMES_IN_FLIGHT];
+
+    struct ModelBuilder modelBuilder;
+    uint32_t modelQuantity;
+    struct Model *model;
+
+    VkImage depthImage;
+    VkDeviceMemory depthImageMemory;
+    VkImageView depthImageView;
+
+    bool *framebufferResized;
+
+    VkSampleCountFlagBits msaaSamples;
+
+    VkImage colorImage;
+    VkDeviceMemory colorImageMemory;
+    VkImageView colorImageView;
+
+    vec3 cameraPos;
+    vec3 center;
 };
 
-struct VulkanTools setup(void);
+struct VulkanTools setup(uint32_t modelQuantity, struct ModelBuilder modelBuilder[modelQuantity]);
+void recreateSwapChain(struct VulkanTools *vulkan);
 void cleanup(struct VulkanTools vulkan);
-void drawFrame(struct VulkanTools *vulkan);
+
+VkResult drawFrame(struct VulkanTools *vulkan);
 
 #endif // !VULKAN_TOOLS

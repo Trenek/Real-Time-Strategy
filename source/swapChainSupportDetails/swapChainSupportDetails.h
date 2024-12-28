@@ -1,4 +1,4 @@
-#include "VulkanTools.h"
+#include <vulkan/vulkan.h>
 
 struct SwapChainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;
@@ -10,3 +10,4 @@ struct SwapChainSupportDetails {
 };
 
 struct SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
+void freeSwapChainSupportDetails(struct SwapChainSupportDetails *this);

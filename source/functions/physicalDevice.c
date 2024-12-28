@@ -1,40 +1,49 @@
-#include <malloc.h>
 #include <string.h>
+#include <myMalloc.h>
 
-#include "VulkanTools.h"
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_beta.h>
+
+#include "MY_ASSERT.h"
 #include "swapChainSupportDetails.h"
 #include "queueFamilyIndices.h"
 
-extern const char *const deviceExtensions[];
-extern const uint32_t deviceExtensionsCount;
+const char *const deviceExtensions[] = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+#ifdef __APPLE__
+    VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
+#endif
+};
+const uint32_t deviceExtensionsCount = sizeof(deviceExtensions) / sizeof(const char *const);
 
 static bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
-    uint32_t extensionCount = 0;
-    VkExtensionProperties *avaibleExtensions = NULL;
-
-    vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
-    avaibleExtensions = malloc(sizeof(VkExtensionProperties) * extensionCount);
-    vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, avaibleExtensions);
+    uint32_t extensionCount = 0; {
+        vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
+    }
+    VkExtensionProperties avaibleExtensions[extensionCount];
 
     uint32_t i = 0;
     uint32_t j = 0;
     bool isFound = true;
+
+    vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, avaibleExtensions);
+
     while (i < deviceExtensionsCount && isFound == true) {
-        isFound = false;
+        bool isElemFound = false;
         j = 0;
 
-        while (isFound == false && j < extensionCount) {
+        while (isElemFound == false && j < extensionCount) {
             if (strcmp(deviceExtensions[i], avaibleExtensions[j].extensionName) == 0) {
-                isFound = true;
+                isElemFound = true;
             }
 
             j += 1;
         }
 
+        isFound = isFound && isElemFound;
         i += 1;
     }
-
-    free(avaibleExtensions);
 
     return isFound;
 }
@@ -45,43 +54,60 @@ static bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
     struct QueueFamilyIndices queueFamilies = findQueueFamilies(device, surface);
     struct SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device, surface);
 
-    bool swapChainSupportVariable = swapChainSupport.formatCount != 0 && swapChainSupport.presentModeCount != 0;
+    bool swapChainAdequate = swapChainSupport.formatCount != 0 &&
+                             swapChainSupport.presentModeCount != 0;
 
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-    free(swapChainSupport.formats);
-    free(swapChainSupport.presentModes);
+    freeSwapChainSupportDetails(&swapChainSupport);
 
-    return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-        deviceFeatures.geometryShader &&
+    return 
+//      deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+//      deviceFeatures.geometryShader &&
+        deviceFeatures.samplerAnisotropy &&
         checkDeviceExtensionSupport(device) &&
-        swapChainSupportVariable &&
+        swapChainAdequate &&
         queueFamilies.graphicsFamily.exists &&
         queueFamilies.presentFamily.exists;
 }
 
-VkPhysicalDevice pickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface) {
+static VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice) {
+    VkPhysicalDeviceProperties physicalDeviceProperties; {
+        vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+    }
+    VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts &
+                                physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+
+    return (counts & VK_SAMPLE_COUNT_64_BIT) ? VK_SAMPLE_COUNT_64_BIT :
+           (counts & VK_SAMPLE_COUNT_32_BIT) ? VK_SAMPLE_COUNT_32_BIT :
+           (counts & VK_SAMPLE_COUNT_16_BIT) ? VK_SAMPLE_COUNT_16_BIT :
+           (counts & VK_SAMPLE_COUNT_8_BIT)  ? VK_SAMPLE_COUNT_8_BIT :
+           (counts & VK_SAMPLE_COUNT_4_BIT)  ? VK_SAMPLE_COUNT_4_BIT :
+           (counts & VK_SAMPLE_COUNT_2_BIT)  ? VK_SAMPLE_COUNT_2_BIT :
+                                               VK_SAMPLE_COUNT_1_BIT;
+}
+
+VkPhysicalDevice pickPhysicalDevice(VkSampleCountFlagBits *msaaSamples, VkInstance instance, VkSurfaceKHR surface) {
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-    uint32_t deviceCount = 0;
-    VkPhysicalDevice *devices;
+    uint32_t deviceCount = 0; {
+        vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
+        MY_ASSERT(deviceCount != 0);
+    }
+    VkPhysicalDevice devices[deviceCount];
     uint32_t i = 0;
 
-    vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
-    assert(deviceCount != 0);
-
-    devices = malloc(sizeof(VkPhysicalDevice) * deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices);
 
     while (i < deviceCount && physicalDevice == VK_NULL_HANDLE) {
         if (isDeviceSuitable(devices[i], surface)) {
             physicalDevice = devices[i];
+            *msaaSamples = getMaxUsableSampleCount(physicalDevice);
         }
         i += 1;
     }
 
-    assert(physicalDevice != NULL);
-    free(devices);
+    MY_ASSERT(physicalDevice != NULL);
 
     return physicalDevice;
 }

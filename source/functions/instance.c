@@ -1,8 +1,11 @@
-#include <malloc.h>
+#include <myMalloc.h>
 #include <string.h>
 #include <stdio.h>
 
-#include "VulkanTools.h"
+#include <vulkan/vulkan.h>
+#include <GLFW/glfw3.h>
+
+#include "MY_ASSERT.h"
 
 #ifdef NDEBUG
 static const bool enableValidationLayers = false;
@@ -15,20 +18,21 @@ static const char *const validationLayers[] = {
 };
 static const uint32_t validationLayersCount = sizeof(validationLayers) / sizeof(const char *);
 
+[[maybe_unused]]
 static bool checkValidationLayerSupport(void) {
-    uint32_t layerCount = 0;
-    VkLayerProperties *avaibleLayers = NULL;
+    bool layerFound = true;
+
+    uint32_t layerCount = 0; {
+        vkEnumerateInstanceLayerProperties(&layerCount, NULL);
+    }
+    VkLayerProperties avaibleLayers[layerCount];
+
     uint32_t i = 0;
     uint32_t j = 0;
-    bool layerFound = false;
-    bool result = true;
 
-    vkEnumerateInstanceLayerProperties(&layerCount, NULL);
-
-    avaibleLayers = malloc(sizeof(VkLayerProperties) * layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, avaibleLayers);
 
-    while (i < validationLayersCount && result == true) {
+    while (i < validationLayersCount && layerFound == true) {
         layerFound = false;
 
         j = 0;
@@ -40,18 +44,13 @@ static bool checkValidationLayerSupport(void) {
             j += 1;
         }
 
-        if (layerFound == false) {
-            result = false;
-        }
-
         i += 1;
     }
 
-    free(avaibleLayers);
-
-    return result;
+    return layerFound;
 }
 
+[[maybe_unused]]
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, [[maybe_unused]] void *pUserData) {
     fprintf(stderr, "VL ");
 
@@ -75,15 +74,12 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
     return VK_FALSE;
 }
 
+[[maybe_unused]]
 static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger) {
     PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
 
-    if (func != NULL) {
-        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-    }
-    else {
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
+    return func != NULL ? func(instance, pCreateInfo, pAllocator, pDebugMessenger) :
+                          VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
 void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator) {
@@ -96,21 +92,23 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 
 static const char **getRequiredExtensions(uint32_t *extensionCount) {
     const char **glfwExtensions = glfwGetRequiredInstanceExtensions(extensionCount);
-    const char **extensions = glfwExtensions;
 
+    uint32_t newSize = *extensionCount + (enableValidationLayers ? 2 : 1);
+    
+    const char **extensions = malloc(sizeof(const char *) * newSize);
+    memcpy(extensions, glfwExtensions, sizeof(const char *) * *extensionCount);
+    extensions[*extensionCount] = VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME; // macos Hell
+    
     if (enableValidationLayers) {
-        uint32_t new = *extensionCount + 1;
-        extensions = malloc(sizeof(const char *) * new);
-
-        memcpy(extensions, glfwExtensions, sizeof(const char *) * *extensionCount);
-        extensions[*extensionCount] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME; // not sure how it works
-        *extensionCount += 1;
+        extensions[*extensionCount + 1] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME; // not sure how it works
     }
+    
+    *extensionCount = newSize;
 
     return extensions;
 }
 
-VkInstance createInstance(VkDebugUtilsMessengerEXT *debugMessenger) {
+VkInstance createInstance([[maybe_unused]] VkDebugUtilsMessengerEXT *debugMessenger) {
     assert(true == checkValidationLayerSupport());
 
     VkInstance instance = NULL;
@@ -122,12 +120,13 @@ VkInstance createInstance(VkDebugUtilsMessengerEXT *debugMessenger) {
         .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
         .pEngineName = "No Engine",
         .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-        .apiVersion = VK_API_VERSION_1_0
+        .apiVersion = VK_API_VERSION_1_1
     };
 
     uint32_t extensionCount = 0;
     const char **extensions = getRequiredExtensions(&extensionCount);
-
+    
+    [[maybe_unused]]
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
         .messageSeverity =  VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -146,7 +145,7 @@ VkInstance createInstance(VkDebugUtilsMessengerEXT *debugMessenger) {
     VkInstanceCreateInfo createInfo = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = enableValidationLayers ? &debugCreateInfo : NULL,
-        .flags = 0,
+        .flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR,
         .pApplicationInfo = &appInfo,
         .enabledLayerCount = enableValidationLayers ? validationLayersCount : 0,
         .ppEnabledLayerNames = enableValidationLayers ? validationLayers : NULL,
@@ -155,9 +154,9 @@ VkInstance createInstance(VkDebugUtilsMessengerEXT *debugMessenger) {
     };
 
     MY_ASSERT(VK_SUCCESS == vkCreateInstance(&createInfo, NULL, &instance));
-    MY_ASSERT(VK_SUCCESS == CreateDebugUtilsMessengerEXT(instance, &debugCreateInfo, NULL, debugMessenger));
+    assert(VK_SUCCESS == CreateDebugUtilsMessengerEXT(instance, &debugCreateInfo, NULL, debugMessenger));
 
-    free(extensions);
+    if (enableValidationLayers) free(extensions);
 
     return instance;
 }

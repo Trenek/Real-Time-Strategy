@@ -1,4 +1,6 @@
-#include "VulkanTools.h"
+#include <vulkan/vulkan.h>
+
+#include "MY_ASSERT.h"
 
 VkSemaphore createSemaphore(VkDevice device) {
     VkSemaphore semaphore = NULL;

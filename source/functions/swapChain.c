@@ -1,5 +1,8 @@
+#include <myMalloc.h>
+
 #include "VulkanTools.h"
 
+#include "MY_ASSERT.h"
 #include "swapChainSupportDetails.h"
 #include "queueFamilyIndices.h"
 
@@ -33,7 +36,7 @@ static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR *capabilities,
     int width = 0;
     int height = 0;
 
-    if (capabilities->currentExtent.width == UINT32_MAX) {
+    if (result.width == UINT32_MAX) {
         glfwGetFramebufferSize(window, &width, &height);
 
         result = (VkExtent2D){
@@ -73,8 +76,8 @@ struct swapChain createSwapChain(GLFWwindow *window, VkSurfaceKHR surface, VkPhy
         .imageFormat = surfaceFormat.format,
         .imageColorSpace = surfaceFormat.colorSpace,
         .imageExtent = extent,
-        .imageArrayLayers = 1,
-        .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        .imageArrayLayers = 1, // 1 unless stereoscopic 3D application
+        .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, // VK_IMAGE_USAGE_TRANSFER_DST_BIT for postprocessing
         .imageSharingMode = familyEqual(indices.graphicsFamily, indices.presentFamily) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT,
         .queueFamilyIndexCount = familyEqual(indices.graphicsFamily, indices.presentFamily) ? 0 : 2, // 0 optional
         .pQueueFamilyIndices = familyEqual(indices.graphicsFamily, indices.presentFamily) ? NULL : queueFamilyIndices, // NULL optional

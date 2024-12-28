@@ -1,16 +1,15 @@
-#include "VulkanTools.h"
+#include <vulkan/vulkan.h>
 
-VkCommandBuffer createCommandBuffer(VkDevice device, VkCommandPool commandPool) {
-    VkCommandBuffer commandBuffer = NULL;
+#include "definitions.h"
+#include "MY_ASSERT.h"
 
+void createCommandBuffer(VkCommandBuffer commandBuffer[MAX_FRAMES_IN_FLIGHT], VkDevice device, VkCommandPool commandPool) {
     VkCommandBufferAllocateInfo allocInfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .commandPool = commandPool,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandBufferCount = 1
+        .commandBufferCount = MAX_FRAMES_IN_FLIGHT
     };
 
-    MY_ASSERT(VK_SUCCESS == vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer));
-
-    return commandBuffer;
+    MY_ASSERT(VK_SUCCESS == vkAllocateCommandBuffers(device, &allocInfo, commandBuffer));
 }

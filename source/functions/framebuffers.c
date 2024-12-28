@@ -1,8 +1,10 @@
-#include <malloc.h>
+#include <myMalloc.h>
 
-#include "VulkanTools.h"
+#include <vulkan/vulkan.h>
 
-VkFramebuffer *createFramebuffers(VkDevice device, VkImageView *swapChainImageViews, uint32_t swapChainImagesCount, VkExtent2D swapChainExtent, VkRenderPass renderPass) {
+#include "MY_ASSERT.h"
+
+VkFramebuffer *createFramebuffers(VkDevice device, VkImageView *swapChainImageViews, uint32_t swapChainImagesCount, VkExtent2D swapChainExtent, VkRenderPass renderPass, VkImageView depthImageView, VkImageView colorImageView) {
     VkFramebuffer *swapChainFramebuffers = NULL;
     uint32_t i = 0;
 
@@ -10,13 +12,15 @@ VkFramebuffer *createFramebuffers(VkDevice device, VkImageView *swapChainImageVi
 
     while (i < swapChainImagesCount) {
         VkImageView attachments[] = {
-            swapChainImageViews[i]
+            colorImageView,
+            depthImageView,
+            swapChainImageViews[i],
         };
 
         VkFramebufferCreateInfo framebufferInfo = {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .renderPass = renderPass,
-            .attachmentCount = 1,
+            .attachmentCount = sizeof(attachments) / sizeof(VkImageView),
             .pAttachments = attachments,
             .width = swapChainExtent.width,
             .height = swapChainExtent.height,
