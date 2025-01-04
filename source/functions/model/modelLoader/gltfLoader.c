@@ -1,20 +1,22 @@
 #define CGLTF_IMPLEMENTATION
+#include <vulkan/vulkan.h>
 #include <cgltf.h>
 #include <string.h>
 
 #include "Vertex.h"
 #include "modelLoader.h"
 #include "model.h"
+#include "modelFunctions.h"
 
-void *getBufferOffset(cgltf_buffer_view *bufferView) {
+static void *getBufferOffset(cgltf_buffer_view *bufferView) {
     return (uint8_t *)bufferView->buffer->data + bufferView->offset;
 }
 
-void *getAccessorOffset(cgltf_accessor *accessor) {
+static void *getAccessorOffset(cgltf_accessor *accessor) {
     return (uint8_t *)getBufferOffset(accessor->buffer_view) + accessor->offset;
 }
 
-void applySparce(cgltf_accessor *accessor, void *dest, size_t size) {
+static void applySparce(cgltf_accessor *accessor, void *dest, size_t size) {
     uint16_t *indices = NULL;
     uint8_t *newVal = NULL;
 
@@ -28,55 +30,127 @@ void applySparce(cgltf_accessor *accessor, void *dest, size_t size) {
     }
 }
 
-static void loadModel(const char *filePath, struct Model *model) {
+static int countMeshes(uint16_t n, cgltf_node x[n]) {
+    int quantity = 0;
+
+    for (uint16_t i = 0; i < n; i += 1) {
+        if (x[i].mesh != NULL) {
+            quantity += 1;
+        }
+    }
+
+    return quantity;
+}
+
+cgltf_accessor *getAccessor(cgltf_attribute_type type, cgltf_primitive* primitive) {
+    cgltf_accessor *result = NULL;
+
+    for (size_t i = 0; result == NULL && i < primitive->attributes_count; i += 1) {
+        if (primitive->attributes[i].type == type) {
+            result = primitive->attributes[i].data;
+        }
+    }
+
+    return result;
+}
+
+void loadFromAccessor(cgltf_accessor *accessor, void *local, size_t size, uint16_t quantity) {
+    if (accessor != NULL) {
+        memcpy(local, getAccessorOffset(accessor), size * quantity);
+        applySparce(accessor, local, size);
+    }
+}
+
+static struct Mesh loadMesh(cgltf_mesh *mesh) {
+    struct Mesh result = { 0 };
+    cgltf_primitive* primitive = mesh->primitives;
+
+    cgltf_accessor *index_accessor = primitive->indices;
+    cgltf_accessor *vertex_accessor = getAccessor(cgltf_attribute_type_position, primitive);
+    cgltf_accessor *texture_accessor = getAccessor(cgltf_attribute_type_texcoord, primitive);
+    cgltf_accessor *color_accessor = getAccessor(cgltf_attribute_type_color, primitive);
+
+    result.indicesQuantity = index_accessor->count;
+    result.verticesQuantity = vertex_accessor->count;
+    result.vertices = malloc(sizeof(struct Vertex) * result.verticesQuantity);
+    result.indices = malloc(sizeof(uint16_t) * result.indicesQuantity);
+
+    float localPosition[result.verticesQuantity][3];
+    float localTexture[result.verticesQuantity][2];
+    float localColor[result.verticesQuantity][3];
+
+    loadFromAccessor(index_accessor, result.indices, sizeof(uint16_t), result.indicesQuantity);
+    loadFromAccessor(vertex_accessor, localPosition, sizeof(float[3]), result.verticesQuantity);
+    loadFromAccessor(texture_accessor, localTexture, sizeof(float[2]), result.verticesQuantity);
+    loadFromAccessor(color_accessor, localColor, sizeof(float[3]), result.verticesQuantity);
+
+    for (size_t i = 0; i < result.verticesQuantity; i += 1) {
+        result.vertices[i] = (struct Vertex) {
+            .pos = {
+                [0] = vertex_accessor == NULL ? 0.0f : localPosition[i][0],
+                [1] = vertex_accessor == NULL ? 0.0f : localPosition[i][1],
+                [2] = vertex_accessor == NULL ? 0.0f : localPosition[i][2]
+            },
+            .texCoord = {
+                [0] = texture_accessor == NULL ? 0.0f : localTexture[i][0],
+                [1] = texture_accessor == NULL ? 0.0f : localTexture[i][1]
+            },
+            .color = {
+                [0] = color_accessor == NULL ? 1.0f : localColor[i][0],
+                [1] = color_accessor == NULL ? 1.0f : localColor[i][1],
+                [2] = color_accessor == NULL ? 1.0f : localColor[i][2]
+            }
+        };
+    }
+
+    return result;
+}
+
+void loadTransformations(mat4 transformations, cgltf_node *node) {
+    glm_mat4_identity(transformations);
+
+    if (node->has_matrix) {
+        memcpy(transformations, node->matrix, sizeof(mat4));
+    }
+
+    if (node->has_translation) {
+        glm_translate(transformations, node->translation);
+    }
+
+    if (node->has_rotation) {
+        float a[3] = {
+            node->rotation[0],
+            node->rotation[1],
+            node->rotation[2]
+        };
+
+        glm_rotate(transformations, acosf(node->rotation[3]) * 2, a);
+    }
+
+    if (node->has_scale) {
+        glm_scale(transformations, node->scale);
+    }
+}
+
+static void loadModel(const char *filePath, struct Model *model, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) {
     cgltf_options options = { 0 };
     cgltf_data *data = NULL;
 
     if (cgltf_result_success == cgltf_parse_file(&options, filePath, &data))
     if (cgltf_result_success == cgltf_load_buffers(&options, data, filePath)) {
-        model->meshQuantity = data->meshes_count;
+        model->meshQuantity = countMeshes(data->nodes_count, data->nodes);
         model->mesh = malloc(sizeof(struct Mesh) * model->meshQuantity);
-        for (uint32_t j = 0; j < data->meshes_count; j += 1) {
-            cgltf_primitive* primitive = data->meshes[j].primitives;
 
-            cgltf_accessor *index_accessor = primitive->indices;
-            cgltf_accessor *vertex_accessor = NULL;
+        createStorageBuffer(model->meshQuantity * sizeof(mat4), model->localMeshBuffers, model->localMeshBuffersMemory, model->localMeshBuffersMapped, device, physicalDevice, surface);
 
-            for (size_t i = 0; i < primitive->attributes_count; i += 1) {
-                if (primitive->attributes[i].type == cgltf_attribute_type_position) {
-                    vertex_accessor = primitive->attributes[i].data;
-                    break;
-                }
+        int i = 0;
+        for (uint32_t j = 0; j < data->nodes_count; j += 1) if (data->nodes[j].mesh != NULL) {
+            model->mesh[i] = loadMesh(data->nodes[j].mesh);
+            for (uint32_t k = 0; k < MAX_FRAMES_IN_FLIGHT; k += 1) {
+                loadTransformations(((mat4 **)model->localMeshBuffersMapped)[k][i], &data->nodes[j]);
             }
-            model->mesh[j].indicesQuantity = index_accessor->count;
-            model->mesh[j].verticesQuantity = vertex_accessor->count;
-            model->mesh[j].vertices = malloc(sizeof(struct Vertex) * model->mesh[j].verticesQuantity);
-            model->mesh[j].indices = malloc(sizeof(uint16_t) * model->mesh[j].indicesQuantity);
 
-            memcpy(model->mesh[j].indices, getAccessorOffset(index_accessor), sizeof(uint16_t) * model->mesh[j].indicesQuantity);
-            float localVertices[model->mesh[j].verticesQuantity][3];
-            memcpy(localVertices, getAccessorOffset(vertex_accessor), sizeof(float) * model->mesh[j].verticesQuantity * 3);
-
-            applySparce(vertex_accessor, localVertices, sizeof(float[3]));
-            applySparce(index_accessor, model->mesh[j].indices, sizeof(uint16_t));
-
-            for (size_t i = 0; i < model->mesh[j].verticesQuantity; i += 1) {
-                model->mesh[j].vertices[i] = (struct Vertex) {
-                    .pos = {
-                        [0] = localVertices[i][0],
-                        [1] = localVertices[i][1],
-                        [2] = localVertices[i][2]
-                    },
-                    .color = {
-                        [0] = localVertices[i][0],
-                        [1] = localVertices[i][1],
-                        [2] = localVertices[i][2]
-                    },
-                    .texCoord = {
-                        0, 0
-                    }
-                };
-            }
+            i += 1;
         }
 
         /*

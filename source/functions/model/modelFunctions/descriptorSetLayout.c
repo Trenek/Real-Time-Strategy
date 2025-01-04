@@ -29,10 +29,19 @@ VkDescriptorSetLayout createDescriptorSetLayout(VkDevice device, uint32_t textur
         .pImmutableSamplers = NULL
     };
 
+    VkDescriptorSetLayoutBinding uboMeshLayoutBinding = {
+        .binding = 3,
+        .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        .descriptorCount = 1,
+        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        .pImmutableSamplers = NULL
+    };
+
     VkDescriptorSetLayoutBinding bindings[] = {
         uboLayoutBinding,
         samplerLayoutBinding,
-        uboModelLayoutBinding
+        uboModelLayoutBinding,
+        uboMeshLayoutBinding
     };
 
     VkDescriptorSetLayoutCreateInfo layoutInfo = {

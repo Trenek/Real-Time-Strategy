@@ -48,6 +48,21 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
     return isFound;
 }
 
+static int isDevicePreferable(VkPhysicalDevice device, VkSurfaceKHR surface) {
+    VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
+    struct SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device, surface);
+
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    freeSwapChainSupportDetails(&swapChainSupport);
+
+    return
+        (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? 1000 : 0) +
+        (deviceFeatures.geometryShader ? 1 : 0);
+}
+
 static bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
     VkPhysicalDeviceProperties deviceProperties;
     VkPhysicalDeviceFeatures deviceFeatures;
@@ -62,9 +77,7 @@ static bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
 
     freeSwapChainSupportDetails(&swapChainSupport);
 
-    return 
-//      deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-//      deviceFeatures.geometryShader &&
+    return
         deviceFeatures.samplerAnisotropy &&
         checkDeviceExtensionSupport(device) &&
         swapChainAdequate &&
@@ -96,18 +109,24 @@ VkPhysicalDevice pickPhysicalDevice(VkSampleCountFlagBits *msaaSamples, VkInstan
     }
     VkPhysicalDevice devices[deviceCount];
     uint32_t i = 0;
+    uint32_t preferableScore = 0;
+    uint32_t currentScore = 0;
 
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices);
 
-    while (i < deviceCount && physicalDevice == VK_NULL_HANDLE) {
+    while (i < deviceCount) {
         if (isDeviceSuitable(devices[i], surface)) {
-            physicalDevice = devices[i];
-            *msaaSamples = getMaxUsableSampleCount(physicalDevice);
+            currentScore = isDevicePreferable(devices[i], surface);
+            if (currentScore > preferableScore) {
+                preferableScore = currentScore;
+                physicalDevice = devices[i];
+            }
         }
         i += 1;
     }
 
     MY_ASSERT(physicalDevice != NULL);
+    *msaaSamples = getMaxUsableSampleCount(physicalDevice);
 
     return physicalDevice;
 }

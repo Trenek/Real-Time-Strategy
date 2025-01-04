@@ -7,6 +7,8 @@
 
 #include "MY_ASSERT.h"
 
+mat4 s;
+
 void updateUniformBuffer(void *uniformBuffersMapped[], uint32_t currentImage, VkExtent2D swapChainExtent, vec3 cameraPos, [[maybe_unused]] vec3 center) {
     struct UniformBufferObject ubo;
 
@@ -16,14 +18,14 @@ void updateUniformBuffer(void *uniformBuffersMapped[], uint32_t currentImage, Vk
 
     ubo.proj[1][1] *= -1;
 
+    glm_mat4_mul(ubo.proj, ubo.view, s);
+
     memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
 
-void updateModelUniformBuffer(uint32_t instanceCount, struct instance instance[instanceCount]) {
-    for (uint32_t i = 0; i < instanceCount; i += 1) {
-        instance[i].update(&instance[i]);
-    }
-}
+struct MeshPushConstants {
+    int meshID;
+};
 
 void recordCommandBuffer(VkCommandBuffer commandBuffer, VkFramebuffer swapChainFramebuffer, VkExtent2D swapChainExtent, struct VulkanTools *vulkan, uint32_t currentFrame) {
     VkCommandBufferBeginInfo beginInfo = {
@@ -88,11 +90,27 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, VkFramebuffer swapChainF
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vulkan->model[i].mesh[j].vertexBuffer, (VkDeviceSize[]){ 0 });
             vkCmdBindIndexBuffer(commandBuffer, vulkan->model[i].mesh[j].indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+            vkCmdPushConstants(commandBuffer, vulkan->model[i].pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(struct MeshPushConstants), &(struct MeshPushConstants) { .meshID = j });
             vkCmdDrawIndexed(commandBuffer, vulkan->model[i].mesh[j].indicesQuantity, vulkan->model[i].instanceCount, 0, 0, 0);
         }
     }
     vkCmdEndRenderPass(commandBuffer);
     MY_ASSERT(VK_SUCCESS == vkEndCommandBuffer(commandBuffer));
+}
+
+void update(struct Model model, uint32_t currentFrame) {
+    for (uint32_t i = 0; i < model.instanceCount; i += 1) {
+        double time = clock() / (double)CLOCKS_PER_SEC;
+        glm_mat4_identity(model.instanceInfo[i].modelMatrix);
+
+        glm_translate(model.instanceInfo[i].modelMatrix, model.instance[i].pos);
+        glm_rotate(model.instanceInfo[i].modelMatrix, glm_rad(90) + time * model.instance[i].rotation[0], (vec3) { 0, 0, 1 });
+        glm_rotate(model.instanceInfo[i].modelMatrix, time * model.instance[i].rotation[1], (vec3) { 0, 1, 0 });
+        glm_rotate(model.instanceInfo[i].modelMatrix, glm_rad(90) + time * model.instance[i].rotation[2], (vec3) { 1, 0, 0 });
+        glm_scale(model.instanceInfo[i].modelMatrix, model.instance[i].scale);
+        model.instanceInfo[i].textureIndex = model.instance[i].textureIndex;
+    }
+    memcpy((uint8_t *)model.uniformModelBuffersMapped[currentFrame], model.instanceInfo, sizeof(struct instanceInfo) * model.instanceCount);
 }
 
 VkResult drawFrame(struct VulkanTools *vulkan) {
@@ -144,8 +162,7 @@ VkResult drawFrame(struct VulkanTools *vulkan) {
     if (VK_SUCCESS == result) {
         updateUniformBuffer(vulkan->uniformBuffersMapped, currentFrame, vulkan->swapChain.extent, vulkan->cameraPos, vulkan->center);
         for (uint32_t i = 0; i < vulkan->modelQuantity; i += 1) {
-            updateModelUniformBuffer(vulkan->model[i].instanceCount, vulkan->model[i].instance);
-            memcpy(vulkan->model[i].uniformModelBuffersMapped[currentFrame], vulkan->model[i].localUniformModelBuffersMapped, sizeof(struct instanceInfo) * vulkan->model[i].instanceCount);
+            update(vulkan->model[i], currentFrame);
         }
 
         vkResetFences(vulkan->device, 1, &vulkan->inFlightFence[currentFrame]);
@@ -164,3 +181,4 @@ VkResult drawFrame(struct VulkanTools *vulkan) {
 
     return result;
 }
+

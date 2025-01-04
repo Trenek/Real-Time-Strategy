@@ -17,7 +17,7 @@ VkDescriptorPool createDescriptorPool(uint32_t texturesCount, VkDevice device) {
         },
         [2] = {
             .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-            .descriptorCount = MAX_FRAMES_IN_FLIGHT
+            .descriptorCount = MAX_FRAMES_IN_FLIGHT * 2
         }
     };
 

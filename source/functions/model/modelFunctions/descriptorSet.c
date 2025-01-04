@@ -41,10 +41,20 @@ void createDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, VkD
             .range = sizeof(struct UniformBufferObject)
         };
 
-        VkDescriptorBufferInfo modelBufferInfo = {
-            .buffer = model.uniformModelBuffers[i],
-            .offset = 0,
-            .range = model.instanceCount * sizeof(struct instanceInfo)
+        VkDescriptorBufferInfo modelBufferInfo[] = {
+            {
+                .buffer = model.uniformModelBuffers[i],
+                .offset = 0,
+                .range = model.instanceCount * sizeof(struct instanceInfo)
+            }
+        };
+
+        VkDescriptorBufferInfo meshBufferInfo[] = {
+            {
+                .buffer = model.localMeshBuffers[i],
+                .offset = 0,
+                .range = model.meshQuantity * sizeof(mat4)
+            }
         };
 
         VkWriteDescriptorSet descriptorWrites[] = {
@@ -74,8 +84,18 @@ void createDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, VkD
                 .dstBinding = 2,
                 .dstArrayElement = 0,
                 .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                .descriptorCount = 1,
-                .pBufferInfo = &modelBufferInfo,
+                .descriptorCount = sizeof(modelBufferInfo) / sizeof(VkDescriptorBufferInfo),
+                .pBufferInfo = modelBufferInfo,
+                .pTexelBufferView = NULL
+            },
+            [3] = {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = descriptorSets[i],
+                .dstBinding = 3,
+                .dstArrayElement = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                .descriptorCount = sizeof(meshBufferInfo) / sizeof(VkDescriptorBufferInfo),
+                .pBufferInfo = meshBufferInfo,
                 .pTexelBufferView = NULL
             }
         };

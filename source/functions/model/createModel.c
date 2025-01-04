@@ -26,29 +26,19 @@ struct Model createModels(struct ModelBuilder modelBuilder, VkDevice device, VkP
         result.texture[i] = loadTexture(modelBuilder.texturesPath[i], device, physicalDevice, surface, commandPool, queue);
     }
 
-    createStorageBuffer(modelBuilder.instanceCount, result.uniformModelBuffers, result.uniformModelBuffersMemory, result.uniformModelBuffersMapped, device, physicalDevice, surface);
-    result.localUniformModelBuffersMapped = malloc(modelBuilder.instanceCount * sizeof(struct instanceInfo));
-
-    modelBuilder.loadModel(modelBuilder.modelPath, &result);
+    createStorageBuffer(modelBuilder.instanceCount * sizeof(struct instanceInfo), result.uniformModelBuffers, result.uniformModelBuffersMemory, result.uniformModelBuffersMapped, device, physicalDevice, surface);
+    result.instanceInfo = malloc(modelBuilder.instanceCount * sizeof(struct instanceInfo));
 
     result.instanceCount = modelBuilder.instanceCount;
-    result.instance = malloc(sizeof(struct instance) * result.instanceCount);
+    result.instance = modelBuilder.instance;
     for (uint32_t i = 0; i < result.instanceCount; i += 1) {
-        result.localUniformModelBuffersMapped[i] = (struct instanceInfo) {
+        result.instanceInfo[i] = (struct instanceInfo) {
             .modelMatrix = { { 0 } },
-            .textureIndex = modelBuilder.instanceTextureIndex[i]
-        };
-
-        result.instance[i] = (struct instance) {
-            .instanceInfo = &result.localUniformModelBuffersMapped[i],
-            .update = modelBuilder.update[i],
-            .pos = {
-                modelBuilder.pos[i][0],
-                modelBuilder.pos[i][1],
-                modelBuilder.pos[i][2],
-            }
+            .textureIndex = 0
         };
     }
+
+    modelBuilder.loadModel(modelBuilder.modelPath, &result, device, physicalDevice, surface);
 
     for (uint32_t i = 0; i < result.meshQuantity; i += 1) {
         result.mesh[i].vertexBuffer = createVertexBuffer(&result.mesh[i].vertexBufferMemory, device, physicalDevice, surface, commandPool, queue, result.mesh[i].verticesQuantity, result.mesh[i].vertices);
@@ -91,6 +81,7 @@ void destroyModels(VkDevice device, struct Model model) {
     free(model.mesh);
 
     destroyStorageBuffer(device, model.uniformModelBuffers, model.uniformModelBuffersMemory);
+    destroyStorageBuffer(device, model.localMeshBuffers, model.localMeshBuffersMemory);
 
     vkDestroyPipeline(device, model.graphicsPipeline, NULL);
     vkDestroyPipelineLayout(device, model.pipelineLayout, NULL);

@@ -30,6 +30,7 @@ struct Mesh {
 struct Model {
     uint32_t instanceCount;
     struct instance *instance;
+    struct instanceInfo *instanceInfo;
 
     uint32_t meshQuantity;
     struct Mesh *mesh;
@@ -37,10 +38,13 @@ struct Model {
     uint32_t texturesQuantity;
     struct Textures *texture;
 
+    VkBuffer localMeshBuffers[MAX_FRAMES_IN_FLIGHT];
+    VkDeviceMemory localMeshBuffersMemory[MAX_FRAMES_IN_FLIGHT];
+    void *localMeshBuffersMapped[MAX_FRAMES_IN_FLIGHT];
+
     VkBuffer uniformModelBuffers[MAX_FRAMES_IN_FLIGHT];
     VkDeviceMemory uniformModelBuffersMemory[MAX_FRAMES_IN_FLIGHT];
     void *uniformModelBuffersMapped[MAX_FRAMES_IN_FLIGHT];
-    struct instanceInfo *localUniformModelBuffersMapped;
 
     VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout pipelineLayout;
@@ -48,7 +52,6 @@ struct Model {
 
     VkDescriptorPool descriptorPool;
     VkDescriptorSet descriptorSets[MAX_FRAMES_IN_FLIGHT];
-
 };
 
 struct Model loadModels(VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, VkCommandPool commandPool, VkQueue queue);

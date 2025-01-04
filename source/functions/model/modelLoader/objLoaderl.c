@@ -1,5 +1,6 @@
 #include "Vertex.h"
 #include "modelLoader.h"
+#include "modelFunctions.h"
 
 #define TINYOBJ_LOADER_C_IMPLEMENTATION
 #include <tinyobj_loader_c.h>
@@ -129,7 +130,7 @@ static void get_file_data(void* ctx, const char* filename, [[maybe_unused]] cons
     }
 }
 
-static void loadModel(const char *objectPath, struct Model *model) {
+static void loadModel(const char *objectPath, struct Model *model, [[maybe_unused]] VkDevice device, [[maybe_unused]] VkPhysicalDevice physicalDevice, [[maybe_unused]] VkSurfaceKHR surface) {
     tinyobj_attrib_t attrib;
     tinyobj_shape_t *shapes;
     size_t num_shapes = 0;
@@ -208,10 +209,15 @@ static void loadModel(const char *objectPath, struct Model *model) {
     for (size_t i = 0; i < attrib.num_faces; i += 1) {
         model->mesh[0].vertices[attrib.faces[i].v_idx].texCoord[0] = 0.0f + attribTexcoords[attrib.faces[i].vt_idx][0];
         model->mesh[0].vertices[attrib.faces[i].v_idx].texCoord[1] = 1.0f - attribTexcoords[attrib.faces[i].vt_idx][1];
-        
+
         model->mesh[0].indices[i] = attrib.faces[i].v_idx;
     }
 #endif
+    createStorageBuffer(model->meshQuantity * sizeof(mat4), model->localMeshBuffers, model->localMeshBuffersMemory, model->localMeshBuffersMapped, device, physicalDevice, surface);
+
+    for (uint32_t k = 0; k < MAX_FRAMES_IN_FLIGHT; k += 1) {
+        glm_mat4_identity(((mat4 **)model->localMeshBuffersMapped)[k][0]);
+    }
 }
 
 struct ModelBuilder objLoader(struct ModelBuilder a) {

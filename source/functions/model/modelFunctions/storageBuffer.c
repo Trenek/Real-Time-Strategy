@@ -5,9 +5,7 @@
 
 #include "definitions.h"
 
-void createStorageBuffer(uint32_t quantity, VkBuffer uniformBuffers[], VkDeviceMemory uniformBuffersMemory[], void *uniformBuffersMapped[], VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) {
-    VkDeviceSize bufferSize = quantity * sizeof(struct instanceInfo);
-
+void createStorageBuffer(VkDeviceSize bufferSize, VkBuffer uniformBuffers[], VkDeviceMemory uniformBuffersMemory[], void *uniformBuffersMapped[], VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) {
     size_t i = 0;
 
     while (i < MAX_FRAMES_IN_FLIGHT) {

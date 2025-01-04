@@ -8,7 +8,7 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 layout(location = 2) out flat uint fragTexIndex;
 
-layout(binding = 0) uniform UniformBufferObject {
+layout(binding = 0) readonly uniform UniformBufferObject {
     mat4 view;
     mat4 proj;
 } ubo;
@@ -22,8 +22,16 @@ layout(std140, binding = 2) readonly buffer ObjectBuffer{
 	ObjectData objects[];
 } instance;
 
+layout(std140, binding = 3) readonly buffer MeshBuffer{
+	mat4 localModel[];
+} mesh;
+
+layout(push_constant) uniform constants {
+	int meshID;
+} PushConstants;
+
 void main() {
-    gl_Position = ubo.proj * ubo.view * instance.objects[gl_InstanceIndex].model * vec4(inPosition, 1.0);
+    gl_Position = ubo.proj * ubo.view * instance.objects[gl_InstanceIndex].model * mesh.localModel[PushConstants.meshID] * vec4(inPosition, 1.0);
 
     fragColor = inColor;
     fragTexCoord = inTexCoord;

@@ -1,7 +1,5 @@
 #include "Vertex.h"
 
-void loadModel(const char *objectPath, struct Vertex **vertices, uint16_t **indices, size_t *verticesQuantity, size_t *indicesQuantity);
-void unloadModel(struct Vertex *vertices, uint16_t *indices);
 VkImage createTextureBuffer(VkDeviceMemory *textureImageMemory, uint32_t *mipLevels, const char *texturePath, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, VkCommandPool commandPool, VkQueue queue);
 VkImageView createTextureImageView(VkDevice device, VkImage image, uint32_t mipmap);
 VkSampler createTextureSampler(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t mipLevels);
