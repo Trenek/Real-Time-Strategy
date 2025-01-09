@@ -12,18 +12,27 @@ endif ()
 
 set(DIRECTORIES
     "${CMAKE_SOURCE_DIR}/source"
-    "${CMAKE_SOURCE_DIR}/source/queueFamilyIndices"
-    "${CMAKE_SOURCE_DIR}/source/setup"
-    "${CMAKE_SOURCE_DIR}/source/swapChainSupportDetails"
-    "${CMAKE_SOURCE_DIR}/source/functions"
-    "${CMAKE_SOURCE_DIR}/source/functions/bufferOperations"
-    "${CMAKE_SOURCE_DIR}/source/functions/commonOperations"
-    "${CMAKE_SOURCE_DIR}/source/functions/imageOperations"
-    "${CMAKE_SOURCE_DIR}/source/functions/depthHelpers"
-    "${CMAKE_SOURCE_DIR}/source/functions/model"
-    "${CMAKE_SOURCE_DIR}/source/functions/model/modelLoader"
-    "${CMAKE_SOURCE_DIR}/source/functions/model/modelFunctions"
+    "${CMAKE_SOURCE_DIR}/source/cohord"
+
+    "${CMAKE_SOURCE_DIR}/source/graphics"
+    "${CMAKE_SOURCE_DIR}/source/graphics/buffers"
+    "${CMAKE_SOURCE_DIR}/source/graphics/setup"
+    "${CMAKE_SOURCE_DIR}/source/graphics/setup/functions"
+    "${CMAKE_SOURCE_DIR}/source/graphics/setup/functions/bufferOperations"
+    "${CMAKE_SOURCE_DIR}/source/graphics/setup/functions/commonOperations"
+    "${CMAKE_SOURCE_DIR}/source/graphics/setup/functions/imageOperations"
+    "${CMAKE_SOURCE_DIR}/source/graphics/setup/functions/depthHelpers"
+    "${CMAKE_SOURCE_DIR}/source/graphics/setup/queueFamilyIndices"
+    "${CMAKE_SOURCE_DIR}/source/graphics/setup/swapChainSupportDetails"
+    "${CMAKE_SOURCE_DIR}/source/graphics/model"
+    "${CMAKE_SOURCE_DIR}/source/graphics/model/builder"
+    "${CMAKE_SOURCE_DIR}/source/graphics/model/builder/loader"
+    "${CMAKE_SOURCE_DIR}/source/graphics/model/builder/type"
+    "${CMAKE_SOURCE_DIR}/source/graphics/model/functions"
     "${CMAKE_SOURCE_DIR}/source/basicThings"
+    "${CMAKE_SOURCE_DIR}/source/windowControl"
+    "${CMAKE_SOURCE_DIR}/source/state"
+    "${CMAKE_SOURCE_DIR}/source/button"
 )
 
 include_directories(${DIRECTORIES})
@@ -34,7 +43,7 @@ file(GLOB SOURCE_FILES ${SOURCE_FILES})
 add_executable(Test ${SOURCE_FILES})
 
 set(FLAGS
-    -O0
+    -O3
     -g
     -W
     -Wall
@@ -105,6 +114,8 @@ add_custom_command(TARGET Shaders POST_BUILD
     COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader.vert -o ${CMAKE_BINARY_DIR}/shaders/vert.spv
     COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader.frag -o ${CMAKE_BINARY_DIR}/shaders/frag.spv
     COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader2.frag -o ${CMAKE_BINARY_DIR}/shaders/frag2.spv
+    COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader2d.frag -o ${CMAKE_BINARY_DIR}/shaders/frag2d.spv
+    COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader2d.vert -o ${CMAKE_BINARY_DIR}/shaders/vert2d.spv
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/textures ${CMAKE_BINARY_DIR}/textures
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/models ${CMAKE_BINARY_DIR}/models
 )
