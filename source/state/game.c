@@ -126,6 +126,18 @@ void game(struct VulkanTools *vulkan, enum state *state) {
         .shadow = false
     };
 
+    struct army enemyArmy = setupArmy((struct army){
+        .cohortCount = 1,
+        .cohort = (struct cohort[]) {
+            {
+                .info = model[16],
+                .center = { 8 * 20.0f, 0.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }
+        }
+    });
+
     struct army army = setupArmy((struct army){
         .cohortCount = 12,
         .cohort = (struct cohort[]) {
@@ -134,6 +146,7 @@ void game(struct VulkanTools *vulkan, enum state *state) {
                 .center = { 0.0f, 0.0f, 0.0f },
                 .formation = 3,
                 .currentFormation = 0,
+                .enemyToFight = &enemyArmy.cohort[0]
             }, {
                 .info = model[5],
                 .center = { 0.0f, 8 * 10.0f, 0.0f },
@@ -193,17 +206,10 @@ void game(struct VulkanTools *vulkan, enum state *state) {
         }
     });
 
-    [[maybe_unused]]struct army enemyArmy = setupArmy((struct army){
-        .cohortCount = 1,
-        .cohort = (struct cohort[]) {
-            {
-                .info = model[16],
-                .center = { 8 * -40.0f, 0.0f, 0.0f },
-                .formation = 3,
-                .currentFormation = 0,
-            }
-        }
-    });
+    struct army *armyArray[] = {
+        &army,
+        &enemyArmy
+    };
 
     struct button button2 = createArmyButtons((struct button){
         .model = &model[3],
@@ -241,7 +247,8 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             }
 
             moveArmy(vulkan->deltaTime.deltaTime, &army);
-            armyCollision(&army, floor.instance[0]);
+            moveArmy(vulkan->deltaTime.deltaTime, &enemyArmy);
+            armyCollision(sizeof(armyArray) / sizeof(struct army *), armyArray, floor.instance[0]);
         }
 
         if (*state == PAUSE) {
@@ -252,6 +259,7 @@ void game(struct VulkanTools *vulkan, enum state *state) {
     vkDeviceWaitIdle(vulkan->device);
 
     freeArmy(&army);
+    freeArmy(&enemyArmy);
     for (uint16_t i = 0; i < sizeof(model) / sizeof(struct Model); i += 1) {
         destroyModels(vulkan->device, model[i]);
     }

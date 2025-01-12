@@ -1,5 +1,7 @@
 #include <cglm.h>
 
+#include "cohord.h"
+
 static void point(uint16_t num, [[maybe_unused]] float scale, vec2 actualPos[num]) {
     uint16_t squareNum = sqrt(num);
     vec2 (*pos)[squareNum] = (vec2 (*)[squareNum])actualPos;
@@ -72,7 +74,7 @@ static void circle(uint16_t num, float scale, vec2 actualPos[num]) {
     }
 }
 
-void armyDisplacement(uint16_t displacementNum, uint16_t num, float scale, vec2 pos[num]) {
+void armyDisplacement(uint16_t displacementNum, uint16_t num, float scale, struct warrior warrior[num]) {
     void (*displacement[])(uint16_t, float scale, vec2[num]) = {
         point,
         square,
@@ -80,5 +82,12 @@ void armyDisplacement(uint16_t displacementNum, uint16_t num, float scale, vec2 
         circle
     };
 
+    vec2 pos[num];
+
     displacement[displacementNum](num, 2 * scale, pos);
+
+    for (uint16_t i = 0; i < num; i += 1) {
+        warrior[i].pos[0] = pos[i][0];
+        warrior[i].pos[1] = pos[i][1];
+    }
 }

@@ -13,7 +13,7 @@ struct instance {
     vec3 scale;
     bool shadow;
 
-    vec3 velocity;
-    vec3 acceleration;
-    float maxVelocity;
+//    vec3 velocity;
+//    vec3 acceleration;
+//    float maxVelocity;
 };
