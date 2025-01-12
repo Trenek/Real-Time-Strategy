@@ -178,6 +178,8 @@ static VkResult localDrawFrame(struct VulkanTools *vulkan, uint16_t modelQuantit
 }
 
 void drawFrame(struct VulkanTools *vulkan, uint16_t modelQuantity, struct Model model[modelQuantity]) {
+    updateDeltaTime(&vulkan->deltaTime);
+
     switch (localDrawFrame(vulkan, modelQuantity, model)) {
         case VK_SUCCESS:
             break;

@@ -12,9 +12,10 @@ struct button {
             float scaleX;
             float scaleY;
         };
-        enum state newState;
+        int newState;
     } *info;
+    int chosen;
 };
 
-void calculateButtonPos(struct button button);
-int checkForClick(GLFWwindow *window, struct button button);
+struct button calculateButtonPos(struct button button);
+int checkForClick(GLFWwindow *window, struct button *button);

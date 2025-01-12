@@ -30,7 +30,7 @@ void menu(struct VulkanTools *vulkan, enum state *state) {
         })), vulkan),
     };
 
-    struct button button = {
+    struct button button = calculateButtonPos((struct button){
         .model = &model[0],
         .info = (struct ButtonInfo[]) {
             [0] = {
@@ -52,11 +52,9 @@ void menu(struct VulkanTools *vulkan, enum state *state) {
                 .newState = EXIT
             }
         }
-    };
+    });
 
     int click = -1;
-
-    calculateButtonPos(button);
 
     *model[1].instance = (struct instance){
         .pos = { 0.0f, 0.0f, 0.0f },
@@ -67,12 +65,11 @@ void menu(struct VulkanTools *vulkan, enum state *state) {
     };
 
     while (*state == MAIN_MENU && !glfwWindowShouldClose(vulkan->window)) {
-    printf("%d\n", getMouseState(vulkan->windowControl, GLFW_MOUSE_BUTTON_LEFT));
         glfwPollEvents();
 
         drawFrame(vulkan, sizeof(model) / sizeof(struct Model), model);
-        click = checkForClick(vulkan->window, button);
-        if (click != -1 && (KEY_PRESS | KEY_CHANGE) == getMouseState(vulkan->windowControl, GLFW_MOUSE_BUTTON_LEFT)) {
+        click = checkForClick(vulkan->window, &button);
+        if ((KEY_PRESS | KEY_CHANGE) == getMouseState(vulkan->windowControl, GLFW_MOUSE_BUTTON_LEFT) && click != -1) {
             *state = button.info[click].newState;
         }
 

@@ -83,6 +83,8 @@ struct VulkanTools setup() {
         vulkan.inFlightFence[i] = createFence(vulkan.device);
     }
 
+    vulkan.deltaTime = initDeltaTime();
+
     return vulkan;
 }
 

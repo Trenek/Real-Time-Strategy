@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "VulkanTools.h"
 #include "state.h"
 
@@ -7,15 +9,42 @@
 #include "instanceBuffer.h"
 
 #include "cohord.h"
+#include "army.h"
 
 void moveCamera(struct windowControl *windowControl, GLFWwindow *window, vec3 direction, vec3 cameraPos, vec2 cameraTilt);
 void getCoordinate(vec3 centerC, struct VulkanTools vulkan);
 
+struct button createArmyButtons(struct button button, struct army *army) {
+    for (uint16_t i = 0; i < army->cohortCount; i += 1) {
+        button.info[i] = (struct ButtonInfo) {
+            .x = 0.12f * i - (army->cohortCount + 1) * 0.1f * 0.5f,
+            .y = 0.75f,
+            .xPos = 0.0f,
+            .yPos = 0.0f,
+            .scaleX = 0.1f,
+            .scaleY = 0.2f,
+            .newState = i,
+        };
+    }
+
+    return calculateButtonPos(button);
+}
+
 void game(struct VulkanTools *vulkan, enum state *state) {
-    uint32_t num = 20;
+    uint32_t num = 10;
     uint32_t instanceCount = num * num;
 
     struct Model model[] = {
+        /*buttons*/ createModels(interface(objLoader((struct ModelBuilder) {
+            .instanceCount = 1,
+            .texturesQuantity = 1,
+            .texturesPath = (const char *[]){ "textures/pause.png" },
+            .modelPath = "models/my_model2d.obj",
+            .vertexShader = "shaders/vert2d.spv",
+            .fragmentShader = "shaders/frag2d.spv",
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f
+        })), vulkan),
         /*floor*/ createModels(object(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
@@ -23,26 +52,6 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             .modelPath = "models/my_floor.obj",
             .vertexShader = "shaders/vert.spv",
             .fragmentShader = "shaders/frag2.spv",
-            .minDepth = 0.0f,
-            .maxDepth = 1.0f
-        })), vulkan),
-        /*objects*/ createModels(object(gltfLoader((struct ModelBuilder) {
-            .instanceCount = instanceCount,
-            .texturesQuantity = 3,
-            .texturesPath = (const char *[]){ "textures/texture.jpg", "textures/texture2.jpg", "textures/texture4.jpg" },
-            .modelPath = "models/cylinder.glb",
-            .vertexShader = "shaders/vert.spv",
-            .fragmentShader = "shaders/frag.spv",
-            .minDepth = 0.0f,
-            .maxDepth = 1.0f
-        })), vulkan),
-        /*buttons*/ createModels(interface(objLoader((struct ModelBuilder) {
-            .instanceCount = 2,
-            .texturesQuantity = 1,
-            .texturesPath = (const char *[]){ "textures/exit.jpg" },
-            .modelPath = "models/my_model2d.obj",
-            .vertexShader = "shaders/vert2d.spv",
-            .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
         })), vulkan),
@@ -56,38 +65,60 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             .minDepth = 1.0f,
             .maxDepth = 1.0f
         })), vulkan),
+        /*buttons*/ createModels(interface(objLoader((struct ModelBuilder) {
+            .instanceCount = 12,
+            .texturesQuantity = 1,
+            .texturesPath = (const char *[]){
+                "textures/pause.png",
+            },
+            .modelPath = "models/my_model2d.obj",
+            .vertexShader = "shaders/vert2d.spv",
+            .fragmentShader = "shaders/frag2d.spv",
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f
+        })), vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+        warriors(instanceCount, vulkan),
+
+        warriors(instanceCount, vulkan),
     };
 
-    vec2 pos[instanceCount];
-
-    struct Model floor = model[0];
+    struct Model floor = model[1];
     *floor.instance = (struct instance){
         .pos = { 0.0f, 0.0f, -50.0f },
         .rotation = { 0.0f, 0.0f, 0.0f },
-        .scale = { 100.0f, 100.0f, 100.0f },
+        .scale = { 10000.0f, 100.0f, 10000.0f },
         .textureIndex = 0
     };
 
-    struct button button = {
-        .model = &model[2],
+    struct button button = calculateButtonPos((struct button){
+        .model = &model[0],
         .info = (struct ButtonInfo[]){
             [0] = {
                 .x = 1.0f,
-                .y = 1.0f,
+                .y = -1.0f,
                 .xPos = -1,
-                .yPos = 1,
+                .yPos = -1,
                 .scaleX = 0.125f,
                 .scaleY = 0.125f,
-                .newState = MAIN_MENU
+                .newState = PAUSE
             }
         }
-    };
+    });
 
     int click = -1;
 
-    calculateButtonPos(button);
-
-    *model[3].instance = (struct instance){
+    *model[2].instance = (struct instance){
         .pos = { 0.0f, 0.0f, 0.5f },
         .rotation = { 0.0f, 0.0f, 0.0f },
         .scale = { 1.0f, 1.0f, 1.0f },
@@ -95,46 +126,133 @@ void game(struct VulkanTools *vulkan, enum state *state) {
         .shadow = false
     };
 
-    struct cohort cohort = {
-        .info = model[1],
-        .center = { 0.0f, 0.0f, 0.0f },
-        .formation = 3,
-        .currentFormation = 0,
-        .warriorPos = pos
-    };
+    struct army army = setupArmy((struct army){
+        .cohortCount = 12,
+        .cohort = (struct cohort[]) {
+            {
+                .info = model[4],
+                .center = { 0.0f, 0.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[5],
+                .center = { 0.0f, 8 * 10.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[6],
+                .center = { 0.0f, 8 * -10.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[7],
+                .center = { 8 * -10.0f, 0.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[8],
+                .center = { 8 * -10.0f, 8 * 10.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[9],
+                .center = { 8 * -10.0f, 8 * -10.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[10],
+                .center = { 8 * -20.0f, 0.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[11],
+                .center = { 8 * -20.0f, 8 * 10.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[12],
+                .center = { 8 * -20.0f, 8 * -10.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[13],
+                .center = { 8 * -30.0f, 0.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[14],
+                .center = { 8 * -30.0f, 8 * 10.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }, {
+                .info = model[15],
+                .center = { 8 * -30.0f, 8 * -10.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }
+        }
+    });
+
+    [[maybe_unused]]struct army enemyArmy = setupArmy((struct army){
+        .cohortCount = 1,
+        .cohort = (struct cohort[]) {
+            {
+                .info = model[16],
+                .center = { 8 * -40.0f, 0.0f, 0.0f },
+                .formation = 3,
+                .currentFormation = 0,
+            }
+        }
+    });
+
+    struct button button2 = createArmyButtons((struct button){
+        .model = &model[3],
+        .info = (struct ButtonInfo[1]) {
+            {
+                { 0 },
+                .newState = 0
+            }
+        }
+    }, &army);
 
     glm_vec3_fill(vulkan->cameraPos, 2.0f);
-    vec2 tilt = { 0.0f, 40.0f };
+    vulkan->cameraPos[0] = 80.0f;
+    vulkan->cameraPos[1] = 0.0f;
+    vulkan->cameraPos[2] = 80.0f;
+    vec2 tilt = { -45.0f, 45.0f };
 
-    armyDisplacement(cohort.formation, cohort.info.instanceCount, cohort.warriorPos);
-    setPosition(model[1], cohort.info.instanceCount, cohort.warriorPos);
     while (GAME == *state && !glfwWindowShouldClose(vulkan->window)) {
         glfwPollEvents();
 
         drawFrame(vulkan, sizeof(model) / sizeof(struct Model), model);
-        click = checkForClick(vulkan->window, button);
-        if (click != -1 && (KEY_PRESS | KEY_CHANGE) == getMouseState(vulkan->windowControl, GLFW_MOUSE_BUTTON_LEFT)) {
+
+        bool isLeftMouseButtonClicked = (KEY_PRESS | KEY_CHANGE) == getMouseState(vulkan->windowControl, GLFW_MOUSE_BUTTON_LEFT);
+
+        chooseCohort(&army, &button2, vulkan, isLeftMouseButtonClicked);
+
+        click = checkForClick(vulkan->window, &button);
+        if (isLeftMouseButtonClicked && click != -1) {
             *state = button.info[click].newState;
         }
         else {
             moveCamera(vulkan->windowControl, vulkan->window, vulkan->center, vulkan->cameraPos, tilt);
             if (GLFW_PRESS == glfwGetMouseButton(vulkan->window, GLFW_MOUSE_BUTTON_RIGHT)) {
-                getCoordinate(cohort.center, *vulkan);
+                getCoordinate(army.cohort[army.chosenOne].center, *vulkan);
             }
 
-            giveAcceleration(cohort);
+            moveArmy(vulkan->deltaTime.deltaTime, &army);
+            armyCollision(&army, floor.instance[0]);
+        }
 
-            calculateVelocity(cohort.info.instanceCount, cohort.info.instance);
-            move(cohort.info.instanceCount, cohort.info.instance);
-            collision(cohort.info.instanceCount, cohort.info.instance, floor.instance[0]);
-
-            armyDisplacement(2, cohort.info.instanceCount, cohort.warriorPos);
+        if (*state == PAUSE) {
+            pause(vulkan, state, (sizeof(model) / sizeof(struct Model)) - 1, model + 1);
         }
     }
 
     vkDeviceWaitIdle(vulkan->device);
-    destroyModels(vulkan->device, model[0]);
-    destroyModels(vulkan->device, model[1]);
-    destroyModels(vulkan->device, model[2]);
-    destroyModels(vulkan->device, model[3]);
+
+    freeArmy(&army);
+    for (uint16_t i = 0; i < sizeof(model) / sizeof(struct Model); i += 1) {
+        destroyModels(vulkan->device, model[i]);
+    }
 }

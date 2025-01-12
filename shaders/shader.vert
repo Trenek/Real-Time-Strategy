@@ -7,6 +7,7 @@ layout(location = 2) in vec2 inTexCoord;
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 layout(location = 2) out flat uint fragTexIndex;
+layout(location = 3) out flat uint shadow;
 
 layout(binding = 0) readonly uniform UniformBufferObject {
     mat4 view;
@@ -37,4 +38,5 @@ void main() {
     fragColor = inColor;
     fragTexCoord = inTexCoord;
     fragTexIndex = instance.objects[gl_InstanceIndex].index;
+    shadow = instance.objects[gl_InstanceIndex].shadow ? 1 : 0;
 }

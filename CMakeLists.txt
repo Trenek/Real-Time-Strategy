@@ -12,8 +12,6 @@ endif ()
 
 set(DIRECTORIES
     "${CMAKE_SOURCE_DIR}/source"
-    "${CMAKE_SOURCE_DIR}/source/cohord"
-
     "${CMAKE_SOURCE_DIR}/source/graphics"
     "${CMAKE_SOURCE_DIR}/source/graphics/buffers"
     "${CMAKE_SOURCE_DIR}/source/graphics/setup"
@@ -29,10 +27,14 @@ set(DIRECTORIES
     "${CMAKE_SOURCE_DIR}/source/graphics/model/builder/loader"
     "${CMAKE_SOURCE_DIR}/source/graphics/model/builder/type"
     "${CMAKE_SOURCE_DIR}/source/graphics/model/functions"
+    "${CMAKE_SOURCE_DIR}/source/deltaTime"
     "${CMAKE_SOURCE_DIR}/source/basicThings"
     "${CMAKE_SOURCE_DIR}/source/windowControl"
     "${CMAKE_SOURCE_DIR}/source/state"
     "${CMAKE_SOURCE_DIR}/source/button"
+
+    "${CMAKE_SOURCE_DIR}/source/army"
+    "${CMAKE_SOURCE_DIR}/source/army/cohord"
 )
 
 include_directories(${DIRECTORIES})
@@ -57,6 +59,7 @@ set(FLAGS
     -pedantic-errors
     -D_GLIBCXX_DEBUG
     -D_GLIBCXX_DEBUG_PEDANTIC
+    -D_UCRT
 )
 
 target_compile_options(Test PUBLIC ${FLAGS})
@@ -88,6 +91,7 @@ if (WIN32)
     set(LINK_LIBRARIES
         ${LINK_LIBRARIES}
         "${CMAKE_SOURCE_DIR}/dependencies/glfw-3.4/src/libglfw3.a"
+        -lucrt
     )
 else ()
     set(LINK_LIBRARIES

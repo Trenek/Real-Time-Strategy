@@ -8,6 +8,7 @@
 #include "definitions.h"
 
 #include "windowControl.h"
+#include "deltaTime.h"
 
 struct swapChain {
     VkImage *images;
@@ -48,14 +49,15 @@ struct VulkanTools {
     VkSemaphore renderFinishedSemaphore[MAX_FRAMES_IN_FLIGHT];
     VkFence inFlightFence[MAX_FRAMES_IN_FLIGHT];
 
-  // uint32_t modelQuantity;
-  //  struct Model *model;
+    uint32_t modelQuantity;
+    struct Model *model;
 
     VkImage depthImage;
     VkDeviceMemory depthImageMemory;
     VkImageView depthImageView;
 
     bool *framebufferResized;
+    struct deltaTimeManager deltaTime;
 
     VkSampleCountFlagBits msaaSamples;
 
