@@ -90,7 +90,7 @@ static void bindBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevi
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
         VkDescriptorBufferInfo modelBufferInfo[] = {
             {
-                .buffer = model.uniformModelBuffers[i],
+                .buffer = model.graphics.uniformModelBuffers[i],
                 .offset = 0,
                 .range = model.instanceCount * sizeof(struct instanceBuffer)
             }
@@ -98,7 +98,7 @@ static void bindBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevi
 
         VkDescriptorBufferInfo meshBufferInfo[] = {
             {
-                .buffer = model.localMeshBuffers[i],
+                .buffer = model.graphics.localMeshBuffers[i],
                 .offset = 0,
                 .range = model.meshQuantity * sizeof(mat4)
             }

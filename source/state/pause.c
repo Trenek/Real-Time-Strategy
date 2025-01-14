@@ -18,7 +18,7 @@ void pause(struct VulkanTools *vulkan, enum state *state, uint16_t modelQuantity
         .fragmentShader = "shaders/frag2d.spv",
         .minDepth = 0.0f,
         .maxDepth = 1.0f
-    })), vulkan);
+    })), &vulkan->graphics);
 
     memcpy(pauseModel + 1, model, sizeof(struct Model) * modelQuantity);
 
@@ -58,6 +58,5 @@ void pause(struct VulkanTools *vulkan, enum state *state, uint16_t modelQuantity
         }
     }
 
-    vkDeviceWaitIdle(vulkan->device);
-    destroyModels(vulkan->device, pauseModel[0]);
+    destroyModelArray(1, pauseModel, &vulkan->graphics);
 }

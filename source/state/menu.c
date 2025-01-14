@@ -17,7 +17,7 @@ void menu(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), vulkan),
+        })), &vulkan->graphics),
         /*background*/ createModels(interface(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
@@ -27,7 +27,7 @@ void menu(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), vulkan),
+        })), &vulkan->graphics),
     };
 
     struct button button = calculateButtonPos((struct button){
@@ -75,7 +75,5 @@ void menu(struct VulkanTools *vulkan, enum state *state) {
 
     }
 
-    vkDeviceWaitIdle(vulkan->device);
-    destroyModels(vulkan->device, model[0]);
-    destroyModels(vulkan->device, model[1]);
+    destroyModelArray(sizeof(model) / sizeof(struct Model), model, &vulkan->graphics);
 }

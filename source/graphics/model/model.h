@@ -38,22 +38,24 @@ struct Model {
     uint32_t texturesQuantity;
     struct Textures *texture;
 
-    VkBuffer localMeshBuffers[MAX_FRAMES_IN_FLIGHT];
-    VkDeviceMemory localMeshBuffersMemory[MAX_FRAMES_IN_FLIGHT];
-    void *localMeshBuffersMapped[MAX_FRAMES_IN_FLIGHT];
+    struct ModelGraphics {
+        VkBuffer localMeshBuffers[MAX_FRAMES_IN_FLIGHT];
+        VkDeviceMemory localMeshBuffersMemory[MAX_FRAMES_IN_FLIGHT];
+        void *localMeshBuffersMapped[MAX_FRAMES_IN_FLIGHT];
 
-    VkBuffer uniformModelBuffers[MAX_FRAMES_IN_FLIGHT];
-    VkDeviceMemory uniformModelBuffersMemory[MAX_FRAMES_IN_FLIGHT];
-    void *uniformModelBuffersMapped[MAX_FRAMES_IN_FLIGHT];
+        VkBuffer uniformModelBuffers[MAX_FRAMES_IN_FLIGHT];
+        VkDeviceMemory uniformModelBuffersMemory[MAX_FRAMES_IN_FLIGHT];
+        void *uniformModelBuffersMapped[MAX_FRAMES_IN_FLIGHT];
 
-    VkDescriptorSetLayout descriptorSetLayout;
-    VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
+        VkDescriptorSetLayout descriptorSetLayout;
+        VkPipelineLayout pipelineLayout;
+        VkPipeline graphicsPipeline;
 
-    VkDescriptorPool descriptorPool;
-    VkDescriptorSet descriptorSets[MAX_FRAMES_IN_FLIGHT];
+        VkDescriptorPool descriptorPool;
+        VkDescriptorSet descriptorSets[MAX_FRAMES_IN_FLIGHT];
+    } graphics;
 };
 
-struct VulkanTools;
-struct Model createModels(struct ModelBuilder modelBuilder, struct VulkanTools *vulkan);
-void destroyModels(VkDevice device, struct Model model);
+struct GraphicsSetup;
+struct Model createModels(struct ModelBuilder modelBuilder, struct GraphicsSetup *vulkan);
+void destroyModelArray(uint16_t num, struct Model modelArray[num], struct GraphicsSetup *graphics);

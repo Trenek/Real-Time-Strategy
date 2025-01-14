@@ -44,7 +44,7 @@ static void recordCommandBuffer(VkCommandBuffer commandBuffer, VkFramebuffer swa
 
     VkRenderPassBeginInfo renderPassInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = vulkan->renderPass,
+        .renderPass = vulkan->graphics.renderPass,
         .framebuffer = swapChainFramebuffer,
         .renderArea = {
             .offset = {
@@ -77,14 +77,14 @@ static void recordCommandBuffer(VkCommandBuffer commandBuffer, VkFramebuffer swa
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     for (uint32_t i = 0; i < modelQuantity; i += 1) {
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, model[i].graphicsPipeline);
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, model[i].graphics.graphicsPipeline);
 
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, model[i].pipelineLayout, 0, 1, &model[i].descriptorSets[currentFrame], 0, NULL);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, model[i].graphics.pipelineLayout, 0, 1, &model[i].graphics.descriptorSets[currentFrame], 0, NULL);
         for (uint32_t j = 0; j < model[i].meshQuantity; j += 1) {
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, &model[i].mesh[j].vertexBuffer, (VkDeviceSize[]){ 0 });
             vkCmdBindIndexBuffer(commandBuffer, model[i].mesh[j].indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-            vkCmdPushConstants(commandBuffer, model[i].pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(struct MeshPushConstants), &(struct MeshPushConstants) { .meshID = j });
+            vkCmdPushConstants(commandBuffer, model[i].graphics.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(struct MeshPushConstants), &(struct MeshPushConstants) { .meshID = j });
             vkCmdDrawIndexed(commandBuffer, model[i].mesh[j].indicesQuantity, model[i].instanceCount, 0, 0, 0);
         }
     }
@@ -102,10 +102,10 @@ static void update(struct Model model, uint32_t currentFrame) {
         glm_rotate(model.instanceBuffer[i].modelMatrix,               time * model.instance[i].rotation[1], (vec3) { 0, 1, 0 });
         glm_rotate(model.instanceBuffer[i].modelMatrix,               time * model.instance[i].rotation[2], (vec3) { 0, 0, 1 });
         glm_scale(model.instanceBuffer[i].modelMatrix, model.instance[i].scale);
-        model.instanceBuffer[i].textureIndex = model.instance[i].textureIndex;
+        model.instanceBuffer[i].textureIndex = model.instance[i].textureIndex + model.instance[i].textureInc;
         model.instanceBuffer[i].shadow = model.instance[i].shadow;
     }
-    memcpy((uint8_t *)model.uniformModelBuffersMapped[currentFrame], model.instanceBuffer, sizeof(struct instanceBuffer) * model.instanceCount);
+    memcpy((uint8_t *)model.graphics.uniformModelBuffersMapped[currentFrame], model.instanceBuffer, sizeof(struct instanceBuffer) * model.instanceCount);
 }
 
 static VkResult localDrawFrame(struct VulkanTools *vulkan, uint16_t modelQuantity, struct Model model[modelQuantity]) {
@@ -115,7 +115,7 @@ static VkResult localDrawFrame(struct VulkanTools *vulkan, uint16_t modelQuantit
     static uint32_t currentFrame = 0;
 
     VkSemaphore waitSemaphores[] = {
-        vulkan->imageAvailableSemaphore[currentFrame]
+        vulkan->graphics.imageAvailableSemaphore[currentFrame]
     };
 
     VkPipelineStageFlags waitStages[] = {
@@ -123,7 +123,7 @@ static VkResult localDrawFrame(struct VulkanTools *vulkan, uint16_t modelQuantit
     };
 
     VkSemaphore signalSemaphores[] = {
-        vulkan->renderFinishedSemaphore[currentFrame]
+        vulkan->graphics.renderFinishedSemaphore[currentFrame]
     };
 
     VkSubmitInfo submitInfo = {
@@ -132,13 +132,13 @@ static VkResult localDrawFrame(struct VulkanTools *vulkan, uint16_t modelQuantit
         .pWaitSemaphores = waitSemaphores,
         .pWaitDstStageMask = waitStages,
         .commandBufferCount = 1,
-        .pCommandBuffers = &vulkan->commandBuffer[currentFrame],
+        .pCommandBuffers = &vulkan->graphics.commandBuffer[currentFrame],
         .signalSemaphoreCount = sizeof(signalSemaphores) / sizeof(VkSemaphore),
         .pSignalSemaphores = signalSemaphores
     };
 
     VkSwapchainKHR swapChains[] = {
-        vulkan->swapChain.this
+        vulkan->graphics.swapChain.this
     };
 
     VkPresentInfoKHR presentInfo = {
@@ -151,22 +151,22 @@ static VkResult localDrawFrame(struct VulkanTools *vulkan, uint16_t modelQuantit
         .pResults = NULL // optional
     };
 
-    vkWaitForFences(vulkan->device, 1, &vulkan->inFlightFence[currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(vulkan->graphics.device, 1, &vulkan->graphics.inFlightFence[currentFrame], VK_TRUE, UINT64_MAX);
 
-    result = vkAcquireNextImageKHR(vulkan->device, vulkan->swapChain.this, UINT64_MAX, vulkan->imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    result = vkAcquireNextImageKHR(vulkan->graphics.device, vulkan->graphics.swapChain.this, UINT64_MAX, vulkan->graphics.imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
     if (VK_SUCCESS == result) {
-        updateUniformBuffer(vulkan->uniformBuffersMapped[currentFrame], vulkan->swapChain.extent, vulkan->cameraPos, vulkan->center);
+        updateUniformBuffer(vulkan->graphics.uniformBuffersMapped[currentFrame], vulkan->graphics.swapChain.extent, vulkan->camera.cameraPos, vulkan->camera.center);
         for (uint32_t i = 0; i < modelQuantity; i += 1) {
             update(model[i], currentFrame);
         }
 
-        vkResetFences(vulkan->device, 1, &vulkan->inFlightFence[currentFrame]);
+        vkResetFences(vulkan->graphics.device, 1, &vulkan->graphics.inFlightFence[currentFrame]);
 
-        vkResetCommandBuffer(vulkan->commandBuffer[currentFrame], 0);
-        recordCommandBuffer(vulkan->commandBuffer[currentFrame], vulkan->swapChainFramebuffers[imageIndex], vulkan->swapChain.extent, vulkan, currentFrame, modelQuantity, model);
+        vkResetCommandBuffer(vulkan->graphics.commandBuffer[currentFrame], 0);
+        recordCommandBuffer(vulkan->graphics.commandBuffer[currentFrame], vulkan->graphics.swapChainFramebuffers[imageIndex], vulkan->graphics.swapChain.extent, vulkan, currentFrame, modelQuantity, model);
 
-        MY_ASSERT(VK_SUCCESS == vkQueueSubmit(vulkan->graphicsQueue, 1, &submitInfo, vulkan->inFlightFence[currentFrame]));
-        result = vkQueuePresentKHR(vulkan->presentQueue, &presentInfo);
+        MY_ASSERT(VK_SUCCESS == vkQueueSubmit(vulkan->graphics.graphicsQueue, 1, &submitInfo, vulkan->graphics.inFlightFence[currentFrame]));
+        result = vkQueuePresentKHR(vulkan->graphics.presentQueue, &presentInfo);
 
         if (VK_SUCCESS == result) {
             currentFrame += 1;

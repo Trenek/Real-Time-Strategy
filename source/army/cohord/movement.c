@@ -1,12 +1,4 @@
-#include <time.h>
-#include <string.h>
-
 #include <cglm.h>
-#include <GLFW/glfw3.h>
-
-#include "instanceBuffer.h"
-#include "VulkanTools.h"
-#include "model.h"
 
 #include "cohord.h"
 
@@ -16,7 +8,7 @@ void giveAcceleration(float deltaTime, struct cohort this) {
 
     if (deltaTime != 0)
     for (uint32_t i = 0; i < this.info.instanceCount; i += 1) {
-        glm_vec2_add(this.enemyToFight == NULL ? this.center : this.enemyToFight->center, this.warrior[i].pos, center);
+        glm_vec2_add(this.enemyToFight == NULL ? this.center : this.fightPos, this.warrior[i].pos, center);
 
         glm_vec2_sub(center, this.info.instance[i].pos, deltaX);
         float distance = glm_vec2_norm(deltaX);
@@ -72,7 +64,7 @@ static void calculateNewVelocity(vec2 newVelocity, struct instance a1, struct in
     glm_vec2_sub(w1.velocity, velocityChange, newVelocity);
 }
 
-void actualCollision(struct instance *this, struct instance *that, struct warrior *thisWarrior, struct warrior *thatWarrior) {
+static void actualCollision(struct instance *this, struct instance *that, struct warrior *thisWarrior, struct warrior *thatWarrior) {
     float minDistance = (this->scale[0] + that->scale[0]) / 2.0f;
     float distance = glm_vec2_distance(that->pos, this->pos);
 
@@ -120,45 +112,5 @@ void move(float deltaTime, uint32_t num, struct instance models[num], struct war
     for (uint32_t i = 0; i < num; i += 1) {
         glm_vec3_scale(warrior[i].velocity, deltaTime, temp2);
         glm_vec3_add(models[i].pos, temp2, models[i].pos);
-    }
-}
-
-void setPosition(struct Model model, uint32_t num, struct warrior warrior[num]) {
-    for (uint32_t z = 0; z < num; z += 1) {
-        model.instance[z] = (struct instance) {
-            .textureIndex = z % model.texturesQuantity,
-            .pos[2] = 0.5f
-        };
-        warrior[z].maxVelocity = 5.0f;
-
-        glm_vec2_copy(warrior[z].pos, model.instance[z].pos);
-        glm_vec3_fill(model.instance[z].rotation, 0.0f);
-        glm_vec3_fill(model.instance[z].scale, 2.0f);
-        glm_vec3_fill(warrior[z].velocity, 0.0f);
-        glm_vec3_fill(warrior[z].acceleration, 0.0f);
-    }
-}
-
-void getCoordinate(vec3 result, struct VulkanTools vulkan);
-bool isClicked(struct VulkanTools *vulkan, struct cohort *this) {
-    bool result = false;
-    vec3 pos;
-
-    getCoordinate(pos, *vulkan);
-
-    vec2 diff;
-    for (uint16_t i = 0; result == false &&  i < this->info.instanceCount; i += 1) {
-        glm_vec2_sub(pos, this->info.instance[i].pos, diff);
-        if (fabsf(glm_vec2_norm(diff)) < glm_vec2_norm(this->info.instance[i].scale)) {
-            result = true;
-        }
-    }
-
-    return result;
-}
-
-void highlightCohort(struct cohort *cohort, bool isOn) {
-    for (uint16_t i = 0; i < cohort->info.instanceCount; i += 1) {
-        cohort->info.instance[i].shadow = isOn;
     }
 }

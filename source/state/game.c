@@ -11,9 +11,6 @@
 #include "cohord.h"
 #include "army.h"
 
-void moveCamera(struct windowControl *windowControl, GLFWwindow *window, vec3 direction, vec3 cameraPos, vec2 cameraTilt);
-void getCoordinate(vec3 centerC, struct VulkanTools vulkan);
-
 struct button createArmyButtons(struct button button, struct army *army) {
     for (uint16_t i = 0; i < army->cohortCount; i += 1) {
         button.info[i] = (struct ButtonInfo) {
@@ -30,6 +27,31 @@ struct button createArmyButtons(struct button button, struct army *army) {
     return calculateButtonPos(button);
 }
 
+void updateArmyStructure(struct button *button, struct army *army) {
+    bool recalculate = false;
+
+    for (uint16_t i = 0; i < army->cohortCount; i += 1) {
+        if (army->cohort[i].info.instanceCount == 0) {
+            army->cohort[i] = army->cohort[army->cohortCount - 1];
+
+            if (button != NULL) {
+                button->model->instance[i].pos[0] -= 2;
+                button->info[i] = button->info[army->cohortCount - 1];
+                button->model->instance[i] = button->model->instance[army->cohortCount - 1];
+
+                button->model->instanceCount -= 1;
+            }
+            army->cohortCount -= 1;
+            recalculate = true;
+            i -= 1;
+        }
+    }
+
+    if (button != NULL && recalculate) {
+        *button = createArmyButtons(*button, army);
+    }
+}
+
 void game(struct VulkanTools *vulkan, enum state *state) {
     uint32_t num = 10;
     uint32_t instanceCount = num * num;
@@ -44,7 +66,7 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), vulkan),
+        })), &vulkan->graphics),
         /*floor*/ createModels(object(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
@@ -54,7 +76,7 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), vulkan),
+        })), &vulkan->graphics),
         /*background*/ createModels(interface(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
@@ -64,33 +86,32 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 1.0f,
             .maxDepth = 1.0f
-        })), vulkan),
+        })), &vulkan->graphics),
         /*buttons*/ createModels(interface(objLoader((struct ModelBuilder) {
-            .instanceCount = 12,
+            .instanceCount = 6,
             .texturesQuantity = 1,
             .texturesPath = (const char *[]){
-                "textures/pause.png",
+                "textures/warrior1/high.jpg",
             },
             .modelPath = "models/my_model2d.obj",
             .vertexShader = "shaders/vert2d.spv",
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
-        warriors(instanceCount, vulkan),
+        })), &vulkan->graphics),
+        warriors(instanceCount, &vulkan->graphics),
+        warriors(instanceCount, &vulkan->graphics),
+        warriors(instanceCount, &vulkan->graphics),
+        warriors(instanceCount, &vulkan->graphics),
+        warriors(instanceCount, &vulkan->graphics),
+        warriors(instanceCount, &vulkan->graphics),
 
-        warriors(instanceCount, vulkan),
+        enemy(instanceCount, &vulkan->graphics),
+        enemy(instanceCount, &vulkan->graphics),
+        enemy(instanceCount, &vulkan->graphics),
+        enemy(instanceCount, &vulkan->graphics),
+        enemy(instanceCount, &vulkan->graphics),
+        enemy(instanceCount, &vulkan->graphics),
     };
 
     struct Model floor = model[1];
@@ -127,82 +148,74 @@ void game(struct VulkanTools *vulkan, enum state *state) {
     };
 
     struct army enemyArmy = setupArmy((struct army){
-        .cohortCount = 1,
+        .cohortCount = 6,
         .cohort = (struct cohort[]) {
-            {
-                .info = model[16],
-                .center = { 8 * 20.0f, 0.0f, 0.0f },
+            warriorMovement((struct cohort) {
+                .info = model[10],
+                .center = { 8 * -20.0f, 0.0f, 0.0f },
                 .formation = 3,
-                .currentFormation = 0,
-            }
+            }),
+            warriorMovement((struct cohort) {
+                .info = model[11],
+                .center = { 8 * -20.0f, 8 * 10.0f, 0.0f },
+                .formation = 3,
+            }),
+            warriorMovement((struct cohort) {
+                .info = model[12],
+                .center = { 8 * -20.0f, 8 * -10.0f, 0.0f },
+                .formation = 3,
+            }),
+            warriorMovement((struct cohort) {
+                .info = model[13],
+                .center = { 8 * -30.0f, 0.0f, 0.0f },
+                .formation = 3,
+            }),
+            warriorMovement((struct cohort) {
+                .info = model[14],
+                .center = { 8 * -30.0f, 8 * 10.0f, 0.0f },
+                .formation = 3,
+            }),
+            warriorMovement((struct cohort) {
+                .info = model[15],
+                .center = { 8 * -30.0f, 8 * -10.0f, 0.0f },
+                .formation = 3,
+            })
         }
     });
 
     struct army army = setupArmy((struct army){
-        .cohortCount = 12,
+        .cohortCount = 6,
         .cohort = (struct cohort[]) {
-            {
+            warriorMovement((struct cohort) {
                 .info = model[4],
                 .center = { 0.0f, 0.0f, 0.0f },
                 .formation = 3,
-                .currentFormation = 0,
-                .enemyToFight = &enemyArmy.cohort[0]
-            }, {
+            }),
+            warriorMovement((struct cohort) {
                 .info = model[5],
                 .center = { 0.0f, 8 * 10.0f, 0.0f },
                 .formation = 3,
-                .currentFormation = 0,
-            }, {
+            }),
+            warriorMovement((struct cohort) {
                 .info = model[6],
                 .center = { 0.0f, 8 * -10.0f, 0.0f },
                 .formation = 3,
-                .currentFormation = 0,
-            }, {
+            }),
+            warriorMovement((struct cohort) {
                 .info = model[7],
                 .center = { 8 * -10.0f, 0.0f, 0.0f },
                 .formation = 3,
-                .currentFormation = 0,
-            }, {
+            }),
+            warriorMovement((struct cohort) {
                 .info = model[8],
                 .center = { 8 * -10.0f, 8 * 10.0f, 0.0f },
                 .formation = 3,
-                .currentFormation = 0,
-            }, {
+            }),
+            warriorMovement((struct cohort) {
                 .info = model[9],
                 .center = { 8 * -10.0f, 8 * -10.0f, 0.0f },
                 .formation = 3,
-                .currentFormation = 0,
-            }, {
-                .info = model[10],
-                .center = { 8 * -20.0f, 0.0f, 0.0f },
-                .formation = 3,
-                .currentFormation = 0,
-            }, {
-                .info = model[11],
-                .center = { 8 * -20.0f, 8 * 10.0f, 0.0f },
-                .formation = 3,
-                .currentFormation = 0,
-            }, {
-                .info = model[12],
-                .center = { 8 * -20.0f, 8 * -10.0f, 0.0f },
-                .formation = 3,
-                .currentFormation = 0,
-            }, {
-                .info = model[13],
-                .center = { 8 * -30.0f, 0.0f, 0.0f },
-                .formation = 3,
-                .currentFormation = 0,
-            }, {
-                .info = model[14],
-                .center = { 8 * -30.0f, 8 * 10.0f, 0.0f },
-                .formation = 3,
-                .currentFormation = 0,
-            }, {
-                .info = model[15],
-                .center = { 8 * -30.0f, 8 * -10.0f, 0.0f },
-                .formation = 3,
-                .currentFormation = 0,
-            }
+            })
         }
     });
 
@@ -221,46 +234,53 @@ void game(struct VulkanTools *vulkan, enum state *state) {
         }
     }, &army);
 
-    glm_vec3_fill(vulkan->cameraPos, 2.0f);
-    vulkan->cameraPos[0] = 80.0f;
-    vulkan->cameraPos[1] = 0.0f;
-    vulkan->cameraPos[2] = 80.0f;
-    vec2 tilt = { -45.0f, 45.0f };
-
+    vulkan->camera = initCamera();
     while (GAME == *state && !glfwWindowShouldClose(vulkan->window)) {
         glfwPollEvents();
 
         drawFrame(vulkan, sizeof(model) / sizeof(struct Model), model);
 
-        bool isLeftMouseButtonClicked = (KEY_PRESS | KEY_CHANGE) == getMouseState(vulkan->windowControl, GLFW_MOUSE_BUTTON_LEFT);
-
-        chooseCohort(&army, &button2, vulkan, isLeftMouseButtonClicked);
+        bool isLeftMouseButtonClicked =  (KEY_PRESS | KEY_CHANGE) == getMouseState(vulkan->windowControl, GLFW_MOUSE_BUTTON_LEFT);
+        bool isRightMouseButtonClicked = (KEY_PRESS | KEY_CHANGE) == getMouseState(vulkan->windowControl, GLFW_MOUSE_BUTTON_RIGHT);
 
         click = checkForClick(vulkan->window, &button);
         if (isLeftMouseButtonClicked && click != -1) {
             *state = button.info[click].newState;
         }
         else {
-            moveCamera(vulkan->windowControl, vulkan->window, vulkan->center, vulkan->cameraPos, tilt);
-            if (GLFW_PRESS == glfwGetMouseButton(vulkan->window, GLFW_MOUSE_BUTTON_RIGHT)) {
+            moveCamera(vulkan->windowControl, vulkan->window, vulkan->camera.center, vulkan->camera.cameraPos, vulkan->camera.tilt, vulkan->deltaTime.deltaTime);
+            if (isRightMouseButtonClicked && army.chosenOne != -1) {
                 getCoordinate(army.cohort[army.chosenOne].center, *vulkan);
+                army.cohort[army.chosenOne].enemyToFight = NULL;
             }
 
             moveArmy(vulkan->deltaTime.deltaTime, &army);
             moveArmy(vulkan->deltaTime.deltaTime, &enemyArmy);
             armyCollision(sizeof(armyArray) / sizeof(struct army *), armyArray, floor.instance[0]);
+
+            armyAttack(&army, vulkan->deltaTime.deltaTime);
+            armyAttack(&enemyArmy, vulkan->deltaTime.deltaTime);
+
+            chooseCohort(&army, &button2, vulkan, isLeftMouseButtonClicked);
+            chooseEnemy(&army, &enemyArmy, vulkan, isRightMouseButtonClicked);
+
+            updateArmyStructure(&button2, &army);
+            updateArmyStructure(NULL, &enemyArmy);
         }
 
         if (*state == PAUSE) {
             pause(vulkan, state, (sizeof(model) / sizeof(struct Model)) - 1, model + 1);
         }
+        if (enemyArmy.cohortCount == 0) {
+            *state = WIN;
+        }
+        if (army.cohortCount == 0) {
+            *state = LOSE;
+        }
     }
-
-    vkDeviceWaitIdle(vulkan->device);
 
     freeArmy(&army);
     freeArmy(&enemyArmy);
-    for (uint16_t i = 0; i < sizeof(model) / sizeof(struct Model); i += 1) {
-        destroyModels(vulkan->device, model[i]);
-    }
+
+    destroyModelArray(sizeof(model) / sizeof(struct Model), model, &vulkan->graphics);
 }

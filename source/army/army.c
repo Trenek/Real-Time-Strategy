@@ -124,3 +124,30 @@ void chooseCohort(struct army *army, struct button *button, struct VulkanTools *
         highlightCohort(&army->cohort[army->chosenOne], true);
     }
 }
+
+void armyAttack(struct army *army, float deltaTime) {
+    for (uint16_t i = 0; i < army->cohortCount; i += 1) {
+        attackCohord(&army->cohort[i], deltaTime);
+    }
+}
+
+void chooseEnemy(struct army *army, struct army *enemy, struct VulkanTools *vulkan, bool isRightMouseButtonClicked) {
+    int click = -1;
+
+    if (army->chosenOne != -1) {
+        for (uint16_t i = 0; i < enemy->cohortCount; i += 1) {
+            highlightCohort(&enemy->cohort[i], false);
+        }
+
+        for (uint16_t i = 0; click == -1 && i < enemy->cohortCount; i += 1) {
+            if (isClicked(vulkan, &enemy->cohort[i])) {
+                highlightCohort(&enemy->cohort[i], true);
+                click = i;
+            }
+        }
+
+        if (isRightMouseButtonClicked && click != -1) {
+            army->cohort[army->chosenOne].enemyToFight = &enemy->cohort[click];
+        }
+    }
+}

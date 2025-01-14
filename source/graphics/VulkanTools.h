@@ -10,63 +10,19 @@
 #include "windowControl.h"
 #include "deltaTime.h"
 
-struct swapChain {
-    VkImage *images;
-    uint32_t imagesCount;
-    VkFormat imageFormat;
-    VkExtent2D extent;
-    VkSwapchainKHR this;
-};
+#include "graphicsSetup.h"
+#include "camera.h"
 
 struct VulkanTools {
     GLFWwindow *window;
     struct windowControl *windowControl;
-    VkInstance instance;
-    VkDebugUtilsMessengerEXT debugMessenger;
-    VkSurfaceKHR surface;
-    VkPhysicalDevice physicalDevice;
-    VkQueue presentQueue;
-    VkQueue graphicsQueue;
-    VkQueue transferQueue;
-    VkDevice device;
-
-    struct swapChain swapChain;
-    VkImageView *swapChainImageViews;
-
-    VkRenderPass renderPass;
-
-    VkFramebuffer *swapChainFramebuffers;
-
-    VkCommandPool commandPool;
-    VkCommandBuffer commandBuffer[MAX_FRAMES_IN_FLIGHT];
-    VkCommandPool transferCommandPool;
-
-    VkBuffer uniformBuffers[MAX_FRAMES_IN_FLIGHT];
-    VkDeviceMemory uniformBuffersMemory[MAX_FRAMES_IN_FLIGHT];
-    void *uniformBuffersMapped[MAX_FRAMES_IN_FLIGHT];
-
-    VkSemaphore imageAvailableSemaphore[MAX_FRAMES_IN_FLIGHT];
-    VkSemaphore renderFinishedSemaphore[MAX_FRAMES_IN_FLIGHT];
-    VkFence inFlightFence[MAX_FRAMES_IN_FLIGHT];
-
-    uint32_t modelQuantity;
-    struct Model *model;
-
-    VkImage depthImage;
-    VkDeviceMemory depthImageMemory;
-    VkImageView depthImageView;
-
-    bool *framebufferResized;
     struct deltaTimeManager deltaTime;
 
-    VkSampleCountFlagBits msaaSamples;
+    bool *framebufferResized;
 
-    VkImage colorImage;
-    VkDeviceMemory colorImageMemory;
-    VkImageView colorImageView;
+    struct camera camera;
 
-    vec3 cameraPos;
-    vec3 center;
+    struct GraphicsSetup graphics;
 };
 
 struct VulkanTools setup();
@@ -74,5 +30,8 @@ void recreateSwapChain(struct VulkanTools *vulkan);
 void cleanup(struct VulkanTools vulkan);
 
 void drawFrame(struct VulkanTools *vulkan, uint16_t modelQuantity, struct Model model[modelQuantity]);
+
+void getViewProj(struct VulkanTools vulkan, mat4 resultViewProj, vec4 resultViewPort);
+void getCoordinate(vec3 result, struct VulkanTools vulkan);
 
 #endif // !VULKAN_TOOLS

@@ -213,10 +213,10 @@ static void loadModel(const char *objectPath, struct Model *model, [[maybe_unuse
         model->mesh[0].indices[i] = attrib.faces[i].v_idx;
     }
 #endif
-    createStorageBuffer(model->meshQuantity * sizeof(mat4), model->localMeshBuffers, model->localMeshBuffersMemory, model->localMeshBuffersMapped, device, physicalDevice, surface);
+    createStorageBuffer(model->meshQuantity * sizeof(mat4), model->graphics.localMeshBuffers, model->graphics.localMeshBuffersMemory, model->graphics.localMeshBuffersMapped, device, physicalDevice, surface);
 
     for (uint32_t k = 0; k < MAX_FRAMES_IN_FLIGHT; k += 1) {
-        glm_mat4_identity(((mat4 **)model->localMeshBuffersMapped)[k][0]);
+        glm_mat4_identity(((mat4 **)model->graphics.localMeshBuffersMapped)[k][0]);
     }
 }
 

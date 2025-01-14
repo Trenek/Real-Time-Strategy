@@ -9,7 +9,9 @@ int main(void) {
     struct VulkanTools vulkan = setup();
     void (*state[])(struct VulkanTools *vulkan, enum state *state) = {
         [MAIN_MENU] = menu,
-        [GAME] = game
+        [GAME] = game,
+        [WIN] = win,
+        [LOSE] = lose
     };
     enum state stateID = MAIN_MENU;
 

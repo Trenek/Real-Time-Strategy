@@ -8,12 +8,9 @@ struct instanceBuffer {
 
 struct instance {
     uint32_t textureIndex;
+    uint32_t textureInc;
     vec3 pos;
     vec3 rotation;
     vec3 scale;
     bool shadow;
-
-//    vec3 velocity;
-//    vec3 acceleration;
-//    float maxVelocity;
 };

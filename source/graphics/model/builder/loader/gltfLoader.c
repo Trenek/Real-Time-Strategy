@@ -141,13 +141,13 @@ static void loadModel(const char *filePath, struct Model *model, VkDevice device
         model->meshQuantity = countMeshes(data->nodes_count, data->nodes);
         model->mesh = malloc(sizeof(struct Mesh) * model->meshQuantity);
 
-        createStorageBuffer(model->meshQuantity * sizeof(mat4), model->localMeshBuffers, model->localMeshBuffersMemory, model->localMeshBuffersMapped, device, physicalDevice, surface);
+        createStorageBuffer(model->meshQuantity * sizeof(mat4), model->graphics.localMeshBuffers, model->graphics.localMeshBuffersMemory, model->graphics.localMeshBuffersMapped, device, physicalDevice, surface);
 
         int i = 0;
         for (uint32_t j = 0; j < data->nodes_count; j += 1) if (data->nodes[j].mesh != NULL) {
             model->mesh[i] = loadMesh(data->nodes[j].mesh);
             for (uint32_t k = 0; k < MAX_FRAMES_IN_FLIGHT; k += 1) {
-                loadTransformations(((mat4 **)model->localMeshBuffersMapped)[k][i], &data->nodes[j]);
+                loadTransformations(((mat4 **)model->graphics.localMeshBuffersMapped)[k][i], &data->nodes[j]);
             }
 
             i += 1;
