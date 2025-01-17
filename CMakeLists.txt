@@ -48,7 +48,6 @@ file(GLOB SOURCE_FILES ${SOURCE_FILES})
 add_executable(Test ${SOURCE_FILES})
 
 set(FLAGS
-    -O3
     -g
     -W
     -Wall

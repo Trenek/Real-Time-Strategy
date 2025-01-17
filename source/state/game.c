@@ -219,19 +219,14 @@ void game(struct VulkanTools *vulkan, enum state *state) {
         }
     });
 
-    struct army *armyArray[] = {
+    [[maybe_unused]] struct army *armyArray[] = {
         &army,
         &enemyArmy
     };
 
     struct button button2 = createArmyButtons((struct button){
         .model = &model[3],
-        .info = (struct ButtonInfo[1]) {
-            {
-                { 0 },
-                .newState = 0
-            }
-        }
+        .info = (struct ButtonInfo[6]) {{{ 0 }, 0 }}
     }, &army);
 
     vulkan->camera = initCamera();
