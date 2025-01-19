@@ -21,4 +21,22 @@
   * pokazuje w czasie rzeczywistym rozgrywkę i pozwala na kontrolę armii
   * pokazuje przyciski odpowiedzialne za wybór jednej z posiadanych armii
 ## Rozgrywka
-    
+### Generalnia
+  Każda ze stron rozpoczyna rozgrywnę z 6 armiami składającymi się z jednostek tego samego typu.
+### Wybór armii
+  Wyboru jednej ze swoich armii można dokonać na 2 sposoby:
+  * Poprzez kliknięcie przycisku reprezentującego daną armię
+  * Poprzez bezpośrednie kliknięcie jednej z jednostek należących do danej armii
+  Najechanie na jednostkę/przycisk powoduje podświetlenie odpowiedniej armii.
+  Wybór armii powoduje jej podświetlenie tak długo, jak jest wybrana.
+  Armia która została wybrana jest wybrana aż do momentu:
+  * wybrania innej armii
+  * kliknięcia gdzieś lewym przyciskiem myszy
+### Wybór celu
+  Gdy któraś z armii została wybrana możliwym staje się wybór celu.
+  Cel można wybrać klikając gdzieś prawym przyciskiem myszki.
+  Wybranie celu powoduje rozpoczęcie przemieszczania się armii w stronę celu.
+### Wybór celu ataku
+  Gdy któraś z armii została wybrana możliwym staje się wybór celu ataku.
+  Cel ataku można wybrać poprzez kliknięcie prawym przyciskiem myszy na jedną z wrogich jednostek.
+  Powoduje to obranie za cel całej armii przeciwnika.
