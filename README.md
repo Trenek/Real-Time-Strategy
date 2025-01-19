@@ -2,9 +2,9 @@
 Projekt jest grą strategiczną typu Real Time Strategy.
 
 ## Budowanie projektu
-Projekt można skompilować korzystając z narzędzia cmake w połączeniu z kompilatorem MinGW.
+Projekt można skompilować korzystając z narzędzia Cmake w połączeniu z kompilatorem MinGW.
 Dodatkowo do kompilacji potrzebne będzie Vulkan SDK https://vulkan.lunarg.com/sdk/home
-Projekt można uruchomić/skompilować za pomocą skryptów buildDebug.bat, buildRelease.bat i run.bat
+Projekt można uruchomić/skompilować za pomocą skryptów `buildDebug.bat`, `buildRelease.bat` i `run.bat`
 
 ## Użyte technologie
   * C23
@@ -19,11 +19,12 @@ Projekt można uruchomić/skompilować za pomocą skryptów buildDebug.bat, buil
   Klasy VulkanTools i Model stanowią fasady.
   Klasy ModelBuilder, fighterRange, fighterAttack i fighterDestination reprezentują wzorzec Builder
 
-## Instrukcja obsługi
+## Krótka Instrukcja obsługi
 Po uruchomieniu wyświetla się menu główne w którym można zakończyć działanie aplikacji, bądź rozpocząć grę.
 W samej gdzie celem jest pokonanie wszystkich jednostek wroga. W zależności od tego, czy się to powiedzie
 czy nie zostanie pokazany odpowiedni ekran końcowy, po czym wskutek kliknięcia lewym przyciskiem myszki
 przechodzimy do menu głównego.
+
 ### Sterowanie:
   * WASD - przemieszczanie się
   * Spacja - lecenie w górę

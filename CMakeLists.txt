@@ -106,6 +106,10 @@ endif()
 target_include_directories(Test PRIVATE ${INCLUDE_DIRECTORIES})
 target_link_libraries(Test ${LINK_LIBRARIES})
 
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_link_options(Test PRIVATE -mwindows)
+endif()
+
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 
 add_custom_target(Shaders DEPENDS
