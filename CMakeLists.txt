@@ -15,7 +15,7 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 add_subdirectory(source)
 
 include_directories(${SOURCE_DIRECTORIES})
-add_executable(Test ${SOURCE_FILES})
+add_executable(Test ${SOURCE_FILES} "${CMAKE_SOURCE_DIR}/source/main.c")
 
 set(FLAGS
     -g
@@ -70,3 +70,4 @@ add_custom_command(TARGET shaders POST_BUILD
 )
 
 add_dependencies(Test shaders)
+add_subdirectory(tests)
