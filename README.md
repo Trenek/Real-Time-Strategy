@@ -16,8 +16,8 @@ Projekt można uruchomić/skompilować za pomocą skryptów `buildDebug.bat`, `b
   * tinyobjloader
 
 ## Użyte wzorce projektowe
-  Klasy VulkanTools i Model stanowią fasady.
-  Klasy ModelBuilder, fighterRange, fighterAttack i fighterDestination reprezentują wzorzec Builder
+  Klasy `VulkanTools` i `Model` stanowią fasady.
+  Klasy `ModelBuilder`, `fighterRange`, `fighterAttack` i `fighterDestination` reprezentują wzorzec Builder
 
 ## Skrócona Instrukcja obsługi
 Po uruchomieniu wyświetla się menu główne w którym można zakończyć działanie aplikacji, bądź rozpocząć grę.
