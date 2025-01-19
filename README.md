@@ -19,25 +19,11 @@ Projekt można uruchomić/skompilować za pomocą skryptów `buildDebug.bat`, `b
   Klasy VulkanTools i Model stanowią fasady.
   Klasy ModelBuilder, fighterRange, fighterAttack i fighterDestination reprezentują wzorzec Builder
 
-## Krótka Instrukcja obsługi
+## Skrócona Instrukcja obsługi
 Po uruchomieniu wyświetla się menu główne w którym można zakończyć działanie aplikacji, bądź rozpocząć grę.
-W samej gdzie celem jest pokonanie wszystkich jednostek wroga. W zależności od tego, czy się to powiedzie
+W samej grze celem jest pokonanie wszystkich jednostek wroga. W zależności od tego, czy się to powiedzie
 czy nie zostanie pokazany odpowiedni ekran końcowy, po czym wskutek kliknięcia lewym przyciskiem myszki
 przechodzimy do menu głównego.
-
-### Menu (?)
-  * Menu Główne:
-    * Przycisk rozpoczynający grę
-    * Przycisk zamykający aplikację
-  * Menu Pauzy:
-    * Przycisk wznawiający rozgrywkę
-    * Przycisk zamykający aplikację
-  * Menu Wygranej/Przegranej:
-    * Kliknięcie lewym przyciskiem myszy powoduje przejście do menu głównego
-  * Menu rozgrywki (?)
-    * Przycisk wstrzymujący rozgrywkę
-    * Przyciski pozwalający wybrać posiadanych armii
-
 ### Sterowanie:
   * WASD - przemieszczanie się
   * Spacja - lecenie w górę
@@ -45,8 +31,7 @@ przechodzimy do menu głównego.
   * strzałki - poruszania kamerą
   * C - przejęcie / oddanie kontroli nad kamerą
 ### Sterowanie Wojskami:
-  Aby wybrać jedną ze swoich armii należy kliknąć na jedną z jej jednostek lub na odpowiedni przycisk
-    znajdujący się na dole ekranu
+  Aby wybrać jedną ze swoich armii należy kliknąć na jedną z jej jednostek lub na odpowiedni przycisk znajdujący się na dole ekranu
   Aby przemieścić gdzieś wojsko należy po wybraniu go kliknąć gdzieś prawym przyciskiem myszy. Zmienia to centrum armii na kliknięte miejsce
   Aby zaatakować inne wojsko należy po wybraniu swojego wojska kliknąć na wrodzie wojsko prawym przyciskiem myszy. Od tego momentu nasze wojsko porusza się do odpowiednio zdefiniowanego dla jednostki centrum.
 ### Zasady przemieszczania się wojska
