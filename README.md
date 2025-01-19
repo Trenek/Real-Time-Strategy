@@ -24,9 +24,7 @@ Po uruchomieniu wyświetla się menu główne w którym można zakończyć dzia�
 W samej gdzie celem jest pokonanie wszystkich jednostek wroga. W zależności od tego, czy się to powiedzie
 czy nie zostanie pokazany odpowiedni ekran końcowy, po czym wskutek kliknięcia lewym przyciskiem myszki
 przechodzimy do menu głównego.
-<<<<<<< HEAD
 
-=======
 ### Menu (?)
   * Menu Główne:
     * Przycisk rozpoczynający grę
@@ -39,7 +37,7 @@ przechodzimy do menu głównego.
   * Menu rozgrywki (?)
     * Przycisk wstrzymujący rozgrywkę
     * Przyciski pozwalający wybrać posiadanych armii
->>>>>>> 00fcf1baead6d68e159314c958113356e99e7b9e
+
 ### Sterowanie:
   * WASD - przemieszczanie się
   * Spacja - lecenie w górę
