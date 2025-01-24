@@ -1,17 +1,17 @@
 #include "unity.h"
 
-// Deklaracje funkcji testowych z różnych plików
 void test_createArmyButtons(void);
 void test_updateArmyStructure(void);
+void test_calculateButtonPos(void);
+void test_checkForClick(void);
 
 int main(void) {
     UNITY_BEGIN();
 
-    // Testy z test_game.c
-    printf("[INFO] Rozpoczynam test: test_createArmyButtons\n");
     RUN_TEST(test_createArmyButtons);
-    printf("[INFO] Rozpoczynam test: test_updateArmyStructure\n");
     RUN_TEST(test_updateArmyStructure);
+    RUN_TEST(test_calculateButtonPos);
+    RUN_TEST(test_checkForClick);
 
     // Informacje końcowe o liczbie testów
     printf("\n[INFO] Wszystkie testy zostały wykonane.\n");

@@ -1,7 +1,7 @@
 project(Tester VERSION 1.0 LANGUAGES C)
 
 include_directories(${SOURCE_DIRECTORIES})
-add_executable(Tester ${SOURCE_FILES} test_main.c test_game.c)
+add_executable(Tester ${SOURCE_FILES} test_main.c test_game.c test_button.c)
 
 set(FLAGS
         -g

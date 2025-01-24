@@ -2,37 +2,37 @@
 #include "button.h"
 #include "army.h"
 #include "cohord.h"
-#include <stdlib.h> // malloc, free
-#include <stdio.h>  // printf
+#include <stdlib.h>
+#include <stdio.h>
 
-struct button createArmyButtons(struct button button, struct army *army);
-void updateArmyStructure(struct button *button, struct army *army);
+// Dane testowe dla test_game.c
+static struct button test_button;
+static struct army test_army;
 
-struct button test_button;
-struct army test_army;
+// Lokalne funkcje pomocnicze
+static void prepare_test_game_data(void) {
 
-void setUp(void) {
-    printf("[DEBUG] setUp: Przygotowanie danych testowych.\n");
 }
 
-void tearDown(void) {
-    printf("[DEBUG] tearDown: Czyszczenie danych testowych.\n");
-
+static void cleanup_test_game_data(void) {
     free(test_army.cohort);
     free(test_button.info);
 }
 
 void test_createArmyButtons(void) {
-    printf("[INFO] Rozpoczynam test: test_createArmyButtons\n");
+    printf("\n[INFO] Rozpoczynam test: test_createArmyButtons\n");
 
+    prepare_test_game_data();
 
-    printf("[INFO] Test test_createArmyButtons zakończony pomyślnie.\n");
+    cleanup_test_game_data();
+    printf("[INFO] Test test_createArmyButtons zakonczony pomyslnie.\n");
 }
 
 void test_updateArmyStructure(void) {
-    printf("[INFO] Rozpoczynam test: test_updateArmyStructure\n");
+    printf("\n[INFO] Rozpoczynam test: test_updateArmyStructure\n");
 
+    prepare_test_game_data();
 
-    printf("[INFO] Test test_updateArmyStructure zakończony pomyślnie.\n");
+    cleanup_test_game_data();
+    printf("[INFO] Test test_updateArmyStructure zakonczony pomyslnie.\n");
 }
-
