@@ -1,24 +1,24 @@
 project(Tester VERSION 1.0 LANGUAGES C)
 
 include_directories(${SOURCE_DIRECTORIES})
-add_executable(Tester ${SOURCE_FILES})
+add_executable(Tester ${SOURCE_FILES} test_main.c test_game.c)
 
 set(FLAGS
-    -g
-    -W
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Wshadow
-    -Wunused
-    -Werror
-    -Wno-comment
-    -pedantic
-    -pedantic-errors
-    -D_GLIBCXX_DEBUG
-    -D_GLIBCXX_DEBUG_PEDANTIC
-    -D_UCRT
-)
+        -g
+        -W
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wshadow
+        -Wunused
+        -Werror
+        -Wno-comment
+        -pedantic
+        -pedantic-errors
+        -D_GLIBCXX_DEBUG
+        -D_GLIBCXX_DEBUG_PEDANTIC
+        -D_UCRT
+        )
 
 target_compile_options(Tester PUBLIC ${FLAGS})
 
