@@ -56,7 +56,7 @@ void test_calculateButtonPos(void) {
     }
 
     cleanup_test_button_data();
-    printf("[INFO] Test test_calculateButtonPos zakończony pomyślnie.\n");
+    printf("[INFO] Test test_calculateButtonPos zakonczony pomyslnie.\n");
 }
 
 void test_checkForClick(void) {

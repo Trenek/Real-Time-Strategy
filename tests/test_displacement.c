@@ -12,7 +12,7 @@ void prepare_test_warriors(uint16_t num) {
 }
 
 void test_armyDisplacement() {
-    printf("\n[INFO] Running test: test_armyDisplacement\n");
+    printf("\n[INFO] Rozpoczynam test: test_armyDisplacement\n");
 
     uint16_t displacementNum = 0;
     uint16_t num = 10;
@@ -27,5 +27,5 @@ void test_armyDisplacement() {
         TEST_ASSERT_FLOAT_WITHIN(0.1f, 0.0f, test_warrior[i].pos[1]);
     }
 
-    printf("[INFO] Test test_armyDisplacement completed successfully.\n");
+    printf("[INFO] Test test_armyDisplacement zakonczony pomyslnie.\n");
 }

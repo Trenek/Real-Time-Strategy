@@ -46,8 +46,8 @@ int main(void) {
 
     //test fight
     RUN_TEST(test_attackCohord_noEnemies); // - fail, przeliczyć - nie wiem dlaczego jest fail dlaczego ten ostatni sie nie inicjalizuje na 0
-    RUN_TEST(test_attackCohord_withEnemies); // - fail, przeliczyć
-    RUN_TEST(test_attackCohord_healthUpdates); // - fail, przeliczyć
+    RUN_TEST(test_attackCohord_withEnemies);
+    RUN_TEST(test_attackCohord_healthUpdates);
     RUN_TEST(test_attackCohord_removeDeadUnits);
 
 
