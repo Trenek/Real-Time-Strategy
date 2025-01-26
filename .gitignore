@@ -1,3 +1,4 @@
 build/
+tests_build/
 .kdev4/
 *.kdev4
