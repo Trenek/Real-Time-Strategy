@@ -5,7 +5,7 @@
 
 struct cohort test_cohort_movement;
 
-void prepare_test_cohort_data_movement() {
+void prepare_test() {
     // Przygotowanie danych kohorty
     test_cohort_movement.info.instanceCount = 3;
     test_cohort_movement.info.instance = malloc(sizeof(struct instance) * 3);
@@ -21,15 +21,13 @@ void prepare_test_cohort_data_movement() {
     }
 }
 
-void cleanup_test_cohort_data_movement() {
+void cleanup_test() {
     free(test_cohort_movement.info.instance);
     free(test_cohort_movement.warrior);
 }
 
 void test_giveAcceleration() {
-    printf("\n[INFO] Rozpoczynam test: test_giveAcceleration\n");
-
-    prepare_test_cohort_data_movement();
+    prepare_test();
 
     // Dodanie przyspieszenia do wojowników
     for (int i = 0; i < 3; i++) {
@@ -42,14 +40,11 @@ void test_giveAcceleration() {
         TEST_ASSERT_FLOAT_WITHIN(0.01f, 1.0f, test_cohort_movement.warrior[i].acceleration[0]);
     }
 
-    cleanup_test_cohort_data_movement();
-    printf("[INFO] Test test_giveAcceleration zakonczony pomyslnie.\n");
+    cleanup_test();
 }
 
 void test_calculateVelocity() {
-    printf("\n[INFO] Rozpoczynam test: test_calculateVelocity\n");
-
-    prepare_test_cohort_data_movement();
+    prepare_test();
 
     // Dodanie przyspieszenia
     for (int i = 0; i < 3; i++) {
@@ -62,14 +57,11 @@ void test_calculateVelocity() {
         TEST_ASSERT_FLOAT_WITHIN(0.01f, 1.0f, test_cohort_movement.warrior[i].velocity[0]); // V = a * t
     }
 
-    cleanup_test_cohort_data_movement();
-    printf("[INFO] Test test_calculateVelocity zakonczony pomyslnie.\n");
+    cleanup_test();
 }
 
 void test_move() {
-    printf("\n[INFO] Rozpoczynam test: test_move\n");
-
-    prepare_test_cohort_data_movement();
+    prepare_test();
 
     // Ustawienie początkowej prędkości
     for (int i = 0; i < 3; i++) {
@@ -82,7 +74,6 @@ void test_move() {
         TEST_ASSERT_FLOAT_WITHIN(0.01f, 2.0f, test_cohort_movement.info.instance[i].pos[0]); // S = v * t
     }
 
-    cleanup_test_cohort_data_movement();
-    printf("[INFO] Test test_move zakonczony pomyslnie.\n");
+    cleanup_test();
 }
 

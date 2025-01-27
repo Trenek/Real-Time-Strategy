@@ -1,7 +1,16 @@
 project(Tester VERSION 1.0 LANGUAGES C)
 
 include_directories(${SOURCE_DIRECTORIES})
-add_executable(Tester ${SOURCE_FILES} test_main.c test_button.c test_cohord.c test_displacement.c test_fightBuilder.c test_movement.c test_fight.c)
+
+
+set(T_SOURCE_DIRECTORIES
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+list(TRANSFORM T_SOURCE_DIRECTORIES APPEND "/*.c" OUTPUT_VARIABLE T_SOURCE_FILES)
+file(GLOB T_SOURCE_FILES ${T_SOURCE_FILES})
+
+add_executable(Tester ${SOURCE_FILES} ${T_SOURCE_FILES})
 
 set(FLAGS
         -g

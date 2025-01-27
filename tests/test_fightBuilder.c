@@ -7,7 +7,7 @@
 struct cohort test_cohort_fightBuilder;
 struct cohort enemy_cohort;
 
-void prepare_test_cohorts() {
+static void prepare_test() {
     // Tworzenie testowej kohorty
     test_cohort_fightBuilder.info.instanceCount = 3;
     test_cohort_fightBuilder.info.instance = malloc(sizeof(struct instance) * 3);
@@ -38,7 +38,7 @@ void prepare_test_cohorts() {
     enemy_cohort.enemyToFight = &test_cohort_fightBuilder;
 }
 
-void cleanup_test_cohorts() {
+static void cleanup_test() {
     free(test_cohort_fightBuilder.info.instance);
     free(test_cohort_fightBuilder.warrior);
     free(enemy_cohort.info.instance);
@@ -46,9 +46,7 @@ void cleanup_test_cohorts() {
 }
 
 void test_warriorMovement() {
-    printf("\n[INFO] Rozpoczynam test: test_warriorMovement\n");
-
-    prepare_test_cohorts();
+    prepare_test();
     test_cohort_fightBuilder = warriorMovement(test_cohort_fightBuilder);
 
     // Sprawdzamy, czy funkcje wskaźnikowe zostały przypisane
@@ -69,14 +67,11 @@ void test_warriorMovement() {
     TEST_ASSERT_EQUAL_FLOAT(enemy_cohort.info.instance[0].pos[0], test_cohort_fightBuilder.fightPos[0]);
     TEST_ASSERT_EQUAL_FLOAT(enemy_cohort.info.instance[0].pos[1], test_cohort_fightBuilder.fightPos[1]);
 
-    cleanup_test_cohorts();
-    printf("[INFO] Test test_warriorMovement zakonczony pomyslnie.\n");
+    cleanup_test();
 }
 
 void test_barbarianMovement() {
-    printf("\n[INFO] Rozpoczynam test: test_barbarianMovement\n");
-
-    prepare_test_cohorts();
+    prepare_test();
     test_cohort_fightBuilder = barbarianMovement(test_cohort_fightBuilder);
 
     // Sprawdzamy, czy funkcje wskaźnikowe zostały przypisane
@@ -98,7 +93,6 @@ void test_barbarianMovement() {
     TEST_ASSERT_EQUAL_FLOAT(enemy_cohort.info.instance[0].pos[0], test_cohort_fightBuilder.fightPos[0]);
     TEST_ASSERT_EQUAL_FLOAT(enemy_cohort.info.instance[0].pos[1], test_cohort_fightBuilder.fightPos[1]);
 
-    cleanup_test_cohorts();
-    printf("[INFO] Test test_barbarianMovement zakonczony pomyslnie.\n");
+    cleanup_test();
 }
 

@@ -10,12 +10,11 @@ static struct button test_button;
 static struct Model test_model;
 static struct instance test_instances[3];
 
-
 void setUp(void){}
 void tearDown(void){}
 
 // Lokalne funkcje pomocnicze
-static void prepare_test_button_data(void) {
+static void prepare_test(void) {
     test_model.instanceCount = 3;
     test_model.instance = test_instances;
     test_model.texturesQuantity = 1;
@@ -25,24 +24,23 @@ static void prepare_test_button_data(void) {
 
     for (uint16_t i = 0; i < test_model.instanceCount; i++) {
         test_button.info[i] = (struct ButtonInfo){
-                .x = (float)i * 0.1f,
-                .y = (float)i * 0.2f,
-                .xPos = i,
-                .yPos = i,
-                .scaleX = 0.1f,
-                .scaleY = 0.1f,
-                .newState = i};
+            .x = i * 0.1f,
+            .y = i * 0.2f,
+            .xPos = i,
+            .yPos = i,
+            .scaleX = 0.1f,
+            .scaleY = 0.1f,
+            .newState = i
+        };
     }
 }
 
-static void cleanup_test_button_data(void) {
+static void cleanup_test(void) {
     free(test_button.info);
 }
 
 void test_calculateButtonPos(void) {
-    printf("\n[INFO] Rozpoczynam test: test_calculateButtonPos\n");
-
-    prepare_test_button_data();
+    prepare_test();
     struct button result = calculateButtonPos(test_button);
 
     TEST_ASSERT_NOT_NULL(result.info);
@@ -55,18 +53,16 @@ void test_calculateButtonPos(void) {
         TEST_ASSERT_EQUAL_FLOAT(0.1f, result.model->instance[i].scale[2]);
     }
 
-    cleanup_test_button_data();
-    printf("[INFO] Test test_calculateButtonPos zakonczony pomyslnie.\n");
+    cleanup_test();
 }
 
 void test_checkForClick(void) {
-    printf("\n[INFO] Rozpoczynam test: test_checkForClick\n");
-
-    prepare_test_button_data();
+    prepare_test();
     test_model.instance[0] = (struct instance){
-            .pos = {0.0f, 0.0f, 0.0f},
-            .scale = {0.5f, 1.0f, 0.5f},
-            .shadow = false};
+        .pos = {0.0f, 0.0f, 0.0f},
+        .scale = {0.5f, 1.0f, 0.5f},
+        .shadow = false
+    };
 
     struct GLFWwindow *mock_window = (struct GLFWwindow *)0x1;
     TEST_ASSERT_NOT_NULL(mock_window);
@@ -76,6 +72,5 @@ void test_checkForClick(void) {
     TEST_ASSERT_EQUAL_INT(0, result);
     TEST_ASSERT_TRUE(test_model.instance[0].shadow);
 
-    cleanup_test_button_data();
-    printf("[INFO] Test test_checkForClick zakończony pomyślnie.\n");
+    cleanup_test();
 }

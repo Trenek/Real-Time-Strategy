@@ -5,11 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
-
 struct cohort test_cohort;
 
-
-void prepare_test_cohort_data() {
+static void prepare_test() {
     test_cohort.info.instanceCount = 3;
     test_cohort.info.texturesQuantity = 9;
     test_cohort.info.instance = malloc(sizeof(struct instance) * test_cohort.info.instanceCount);
@@ -27,16 +25,13 @@ void prepare_test_cohort_data() {
     }
 }
 
-void cleanup_test_cohort_data() {
+static void cleanup_test() {
     free(test_cohort.info.instance);
     free(test_cohort.warrior);
 }
 
-
 void test_setPosition() {
-    printf("\n[INFO] Rozpoczynam test: test_setPosition\n");
-
-    prepare_test_cohort_data();
+    prepare_test();
 
     // Wywołanie funkcji do przetestowania
     setPosition(test_cohort.info, test_cohort.info.instanceCount, test_cohort.warrior);
@@ -48,14 +43,11 @@ void test_setPosition() {
         TEST_ASSERT_EQUAL_FLOAT(2.0f, test_cohort.info.instance[i].scale[0]);
     }
 
-    cleanup_test_cohort_data();
-    printf("[INFO] Test test_setPosition zakonczony pomyslnie.\n");
+    cleanup_test();
 }
 
 void test_highlightCohort() {
-    printf("\n[INFO] Rozpoczynam test: test_highlightCohort\n");
-
-    prepare_test_cohort_data();
+    prepare_test();
 
     highlightCohort(&test_cohort, true);
     for (int i = 0; i < (int)test_cohort.info.instanceCount; i++) {
@@ -67,6 +59,5 @@ void test_highlightCohort() {
         TEST_ASSERT_FALSE(test_cohort.info.instance[i].shadow);
     }
 
-    cleanup_test_cohort_data();
-    printf("[INFO] Test test_highlightCohort zakonczony pomyslnie.\n");
+    cleanup_test();
 }

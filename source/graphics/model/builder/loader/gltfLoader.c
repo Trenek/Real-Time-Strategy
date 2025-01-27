@@ -141,6 +141,7 @@ static void loadModel(const char *filePath, struct Model *model, VkDevice device
         model->meshQuantity = countMeshes(data->nodes_count, data->nodes);
         model->mesh = malloc(sizeof(struct Mesh) * model->meshQuantity);
 
+        if (device != NULL) // for tests
         createStorageBuffer(model->meshQuantity * sizeof(mat4), model->graphics.localMeshBuffers, model->graphics.localMeshBuffersMemory, model->graphics.localMeshBuffersMapped, device, physicalDevice, surface);
 
         int i = 0;

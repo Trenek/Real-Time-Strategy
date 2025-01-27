@@ -20,6 +20,9 @@ void test_attackCohord_withEnemies(void);
 void test_attackCohord_healthUpdates(void);
 void test_attackCohord_removeDeadUnits(void);
 
+void test_objLoader(void);
+
+void test_deltaTime(void);
 
 int main(void) {
     UNITY_BEGIN();
@@ -45,11 +48,13 @@ int main(void) {
     RUN_TEST(test_move);
 
     //test fight
-    RUN_TEST(test_attackCohord_noEnemies); // - fail, przeliczyć - nie wiem dlaczego jest fail dlaczego ten ostatni sie nie inicjalizuje na 0
+    RUN_TEST(test_attackCohord_noEnemies);
     RUN_TEST(test_attackCohord_withEnemies);
     RUN_TEST(test_attackCohord_healthUpdates);
     RUN_TEST(test_attackCohord_removeDeadUnits);
 
+    RUN_TEST(test_objLoader);
+    RUN_TEST(test_deltaTime);
 
     // Informacje końcowe o liczbie testów
     printf("\n[INFO] Wszystkie testy zostaly wykonane.\n");
