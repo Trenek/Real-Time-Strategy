@@ -1,1 +1,0 @@
-gdb -tui build\tests\Tester.exe

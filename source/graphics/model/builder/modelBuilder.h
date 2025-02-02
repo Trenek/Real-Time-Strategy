@@ -18,15 +18,11 @@ struct ModelBuilder {
     float minDepth;
     float maxDepth;
 
-    struct ModelLoader {
-        void (*loadModel)(const char *objectPath, struct Model *model, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
-    };
+    void (*loadModel)(const char *objectPath, struct Model *model, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
 
-    struct ModelType {
-        VkDescriptorSetLayout (*createDescriptorSetLayout)(VkDevice device, uint32_t textureQuantity);
-        VkDescriptorPool (*createDescriptorPool)(uint32_t texturesCount, VkDevice device);
-        void (*bindBuffersToDescriptorSets)(VkDescriptorSet descriptorSets[], VkDevice device, VkBuffer uniformBuffers[], struct Model model);
-    };
+    VkDescriptorSetLayout (*createDescriptorSetLayout)(VkDevice device, uint32_t textureQuantity);
+    VkDescriptorPool (*createDescriptorPool)(uint32_t texturesCount, VkDevice device);
+    void (*bindBuffersToDescriptorSets)(VkDescriptorSet descriptorSets[], VkDevice device, VkBuffer uniformBuffers[], struct Model model);
 };
 
 

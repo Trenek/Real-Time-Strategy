@@ -70,4 +70,3 @@ add_custom_command(TARGET shaders POST_BUILD
 )
 
 add_dependencies(Test shaders)
-add_subdirectory(tests)

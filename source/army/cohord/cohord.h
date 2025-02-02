@@ -1,6 +1,7 @@
 #include "model.h"
 #include "instanceBuffer.h"
 
+struct VulkanTools;
 struct warrior {
     vec2 pos;
 
@@ -24,15 +25,9 @@ struct cohort {
     struct warrior *warrior;
     struct cohort *enemyToFight;
 
-    struct figherRange {
-        bool (*isInRange)(struct cohort *cohort, uint16_t this, uint16_t that);
-    };
-    struct fighterAttack {
-        void (*attack)(struct cohort *cohort, uint16_t this, uint16_t that);
-    };
-    struct fighterDestination {
-        void (*chooseDestination)(struct cohort *cohort);
-    };
+    bool (*isInRange)(struct cohort *cohort, uint16_t this, uint16_t that);
+    void (*attack)(struct cohort *cohort, uint16_t this, uint16_t that);
+    void (*chooseDestination)(struct cohort *cohort);
 };
 
 void giveAcceleration(float deltaTime, struct cohort this);

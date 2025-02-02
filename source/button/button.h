@@ -4,14 +4,13 @@
 struct button {
     struct Model *model;
     struct ButtonInfo {
-        struct Position {
+        /* Position */
             float x;
             float y;
             int xPos;
             int yPos;
             float scaleX;
             float scaleY;
-        };
         int newState;
     } *info;
     int chosen;

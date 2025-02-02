@@ -226,7 +226,7 @@ void game(struct VulkanTools *vulkan, enum state *state) {
 
     struct button button2 = createArmyButtons((struct button){
         .model = &model[3],
-        .info = (struct ButtonInfo[6]) {{{ 0 }, 0 }}
+        .info = (struct ButtonInfo[6]) {}
     }, &army);
 
     vulkan->camera = initCamera();

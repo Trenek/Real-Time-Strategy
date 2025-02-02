@@ -1,3 +1,6 @@
+#ifndef GRAPHICS_SETUP_H
+#define GRAPHICS_SETUP_H
+
 #include <vulkan/vulkan.h>
 
 #include "definitions.h"
@@ -46,3 +49,5 @@ struct GraphicsSetup {
 void recreateSwapChainGraphics(GLFWwindow *window, struct GraphicsSetup *vulkan);
 struct GraphicsSetup setupGraphics(GLFWwindow *window);
 void cleanupGraphics(struct GraphicsSetup vulkan);
+
+#endif

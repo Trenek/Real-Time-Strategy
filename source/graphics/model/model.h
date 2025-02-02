@@ -1,3 +1,6 @@
+#ifndef MODEL_H
+#define MODEL_H
+
 #include <vulkan/vulkan.h>
 #include <cglm.h>
 
@@ -59,3 +62,5 @@ struct Model {
 struct GraphicsSetup;
 struct Model createModels(struct ModelBuilder modelBuilder, struct GraphicsSetup *vulkan);
 void destroyModelArray(uint16_t num, struct Model modelArray[num], struct GraphicsSetup *graphics);
+
+#endif

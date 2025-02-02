@@ -1,3 +1,6 @@
+#ifndef INSTANCE_H
+#define INSTANCE_H
+
 #include <cglm.h>
 
 struct instanceBuffer {
@@ -14,3 +17,5 @@ struct instance {
     vec3 scale;
     bool shadow;
 };
+
+#endif
