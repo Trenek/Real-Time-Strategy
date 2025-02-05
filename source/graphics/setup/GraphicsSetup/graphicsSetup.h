@@ -44,6 +44,10 @@ struct GraphicsSetup {
     VkImage colorImage;
     VkDeviceMemory colorImageMemory;
     VkImageView colorImageView;
+
+    VkDescriptorSetLayout cameraDescriptorSetLayout;
+    VkDescriptorPool cameraDescriptorPool;
+    VkDescriptorSet cameraDescriptorSet[MAX_FRAMES_IN_FLIGHT];
 };
 
 void recreateSwapChainGraphics(GLFWwindow *window, struct GraphicsSetup *vulkan);

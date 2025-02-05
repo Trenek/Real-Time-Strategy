@@ -8,7 +8,7 @@
 
 void menu(struct VulkanTools *vulkan, enum state *state) {
     struct Model model[] = {
-        /*buttons*/ createModels(interface(objLoader((struct ModelBuilder) {
+        /*buttons*/ createModels(objLoader((struct ModelBuilder) {
             .instanceCount = 2,
             .texturesQuantity = 2,
             .texturesPath = (const char *[]){ "textures/start.png", "textures/exit.jpg" },
@@ -17,8 +17,8 @@ void menu(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), &vulkan->graphics),
-        /*background*/ createModels(interface(objLoader((struct ModelBuilder) {
+        }), &vulkan->graphics),
+        /*background*/ createModels(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
             .texturesPath = (const char *[]){ "textures/texture.jpg" },
@@ -27,7 +27,7 @@ void menu(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), &vulkan->graphics),
+        }), &vulkan->graphics),
     };
 
     struct button button = calculateButtonPos((struct button){

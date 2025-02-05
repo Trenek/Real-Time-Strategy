@@ -50,12 +50,16 @@ struct Model {
         VkDeviceMemory uniformModelBuffersMemory[MAX_FRAMES_IN_FLIGHT];
         void *uniformModelBuffersMapped[MAX_FRAMES_IN_FLIGHT];
 
-        VkDescriptorSetLayout descriptorSetLayout;
+        VkDescriptorSetLayout objectDescriptorSetLayout;
+        VkDescriptorPool objectDescriptorPool;
+        VkDescriptorSet objectDescriptorSets[MAX_FRAMES_IN_FLIGHT];
+
+        VkDescriptorSetLayout textureDescriptorSetLayout;
+        VkDescriptorPool textureDescriptorPool;
+        VkDescriptorSet textureDescriptorSet[MAX_FRAMES_IN_FLIGHT];
+
         VkPipelineLayout pipelineLayout;
         VkPipeline graphicsPipeline;
-
-        VkDescriptorPool descriptorPool;
-        VkDescriptorSet descriptorSets[MAX_FRAMES_IN_FLIGHT];
     } graphics;
 };
 

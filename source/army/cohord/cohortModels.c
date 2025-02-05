@@ -3,7 +3,7 @@
 #include "modelBuilder.h"
 
 struct Model warriors(uint16_t instanceCount, struct GraphicsSetup *vulkan) {
-    return createModels(object(gltfLoader((struct ModelBuilder) {
+    return createModels(gltfLoader((struct ModelBuilder) {
         .instanceCount = instanceCount,
         .texturesQuantity = 9,
         .texturesPath = (const char *[]){
@@ -16,11 +16,11 @@ struct Model warriors(uint16_t instanceCount, struct GraphicsSetup *vulkan) {
         .fragmentShader = "shaders/frag.spv",
         .minDepth = 0.0f,
         .maxDepth = 1.0f
-    })), vulkan);
+    }), vulkan);
 }
 
 struct Model enemy(uint16_t instanceCount, struct GraphicsSetup *vulkan) {
-    return createModels(object(gltfLoader((struct ModelBuilder) {
+    return createModels(gltfLoader((struct ModelBuilder) {
         .instanceCount = instanceCount,
         .texturesQuantity = 9,
         .texturesPath = (const char *[]){
@@ -33,5 +33,5 @@ struct Model enemy(uint16_t instanceCount, struct GraphicsSetup *vulkan) {
         .fragmentShader = "shaders/frag.spv",
         .minDepth = 0.0f,
         .maxDepth = 1.0f
-    })), vulkan);
+    }), vulkan);
 }

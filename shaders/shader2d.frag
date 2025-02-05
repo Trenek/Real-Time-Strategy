@@ -9,7 +9,7 @@ layout(location = 3) in flat uint shadow;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 1) uniform sampler2D texSampler[1];
+layout(set = 1, binding = 0) uniform sampler2D texSampler[1];
 
 void main() {
     outColor = vec4(texture(texSampler[nonuniformEXT(fragTexIndex)], fragTexCoord).xyz, 1.0) / (shadow + 1);

@@ -56,8 +56,23 @@ void game(struct VulkanTools *vulkan, enum state *state) {
     uint32_t num = 10;
     uint32_t instanceCount = num * num;
 
+    [[maybe_unused]]
+    const char *textures[] = {
+        "textures/pause.png",
+        "textures/grass.jpg",
+        "textures/texture.jpg",
+
+        "textures/warrior1/high.jpg", "textures/warrior1/mid.jpg", "textures/warrior1/low.jpg",
+        "textures/warrior2/high.jpg", "textures/warrior2/mid.jpg", "textures/warrior2/low.jpg",
+        "textures/warrior3/high.jpg", "textures/warrior3/mid.jpg", "textures/warrior3/low.jpg",
+
+        "textures/enemyWarrior1/high.jpg", "textures/enemyWarrior1/mid.jpg", "textures/enemyWarrior1/low.jpg",
+        "textures/enemyWarrior2/high.jpg", "textures/enemyWarrior2/mid.jpg", "textures/enemyWarrior2/low.jpg",
+        "textures/enemyWarrior3/high.jpg", "textures/enemyWarrior3/mid.jpg", "textures/enemyWarrior3/low.jpg",
+    };
+
     struct Model model[] = {
-        /*buttons*/ createModels(interface(objLoader((struct ModelBuilder) {
+        /*buttons*/ createModels(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
             .texturesPath = (const char *[]){ "textures/pause.png" },
@@ -66,18 +81,18 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), &vulkan->graphics),
-        /*floor*/ createModels(object(objLoader((struct ModelBuilder) {
+        }), &vulkan->graphics),
+        /*floor*/ createModels(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
             .texturesPath = (const char *[]){ "textures/grass.jpg" },
             .modelPath = "models/my_floor.obj",
             .vertexShader = "shaders/vert.spv",
-            .fragmentShader = "shaders/frag2.spv",
+            .fragmentShader = "shaders/frag.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), &vulkan->graphics),
-        /*background*/ createModels(interface(objLoader((struct ModelBuilder) {
+        }), &vulkan->graphics),
+        /*background*/ createModels(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
             .texturesPath = (const char *[]){ "textures/texture.jpg" },
@@ -86,8 +101,8 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 1.0f,
             .maxDepth = 1.0f
-        })), &vulkan->graphics),
-        /*buttons*/ createModels(interface(objLoader((struct ModelBuilder) {
+        }), &vulkan->graphics),
+        /*buttons*/ createModels(objLoader((struct ModelBuilder) {
             .instanceCount = 6,
             .texturesQuantity = 1,
             .texturesPath = (const char *[]){
@@ -98,7 +113,7 @@ void game(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), &vulkan->graphics),
+        }), &vulkan->graphics),
         warriors(instanceCount, &vulkan->graphics),
         warriors(instanceCount, &vulkan->graphics),
         warriors(instanceCount, &vulkan->graphics),

@@ -1,6 +1,7 @@
 set(SOURCE_DIRECTORIES
     "${CMAKE_CURRENT_SOURCE_DIR}/camera"
     "${CMAKE_CURRENT_SOURCE_DIR}/graphics"
+        "${CMAKE_CURRENT_SOURCE_DIR}/graphics/descriptors"
         "${CMAKE_CURRENT_SOURCE_DIR}/graphics/buffers"
         "${CMAKE_CURRENT_SOURCE_DIR}/graphics/setup"
             "${CMAKE_CURRENT_SOURCE_DIR}/graphics/setup/window"

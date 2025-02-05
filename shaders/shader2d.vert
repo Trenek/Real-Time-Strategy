@@ -15,11 +15,11 @@ struct ObjectData {
     bool shadow;
 };
 
-layout(std140, binding = 2) readonly buffer ObjectBuffer{
+layout(std140, set = 0, binding = 0) readonly buffer ObjectBuffer{
 	ObjectData objects[];
 } instance;
 
-layout(std140, binding = 3) readonly buffer MeshBuffer{
+layout(std140, set = 0, binding = 1) readonly buffer MeshBuffer{
 	mat4 localModel[];
 } mesh;
 

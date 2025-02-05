@@ -8,7 +8,7 @@
 
 void win(struct VulkanTools *vulkan, enum state *state) {
     struct Model model[] = {
-        /*background*/ createModels(interface(objLoader((struct ModelBuilder) {
+        /*background*/ createModels(objLoader((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
             .texturesPath = (const char *[]){ "textures/win.jpg" },
@@ -17,7 +17,7 @@ void win(struct VulkanTools *vulkan, enum state *state) {
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        })), &vulkan->graphics),
+        }), &vulkan->graphics),
     };
 
     *model[0].instance = (struct instance){

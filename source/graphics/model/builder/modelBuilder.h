@@ -20,14 +20,24 @@ struct ModelBuilder {
 
     void (*loadModel)(const char *objectPath, struct Model *model, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
 
-    VkDescriptorSetLayout (*createDescriptorSetLayout)(VkDevice device, uint32_t textureQuantity);
-    VkDescriptorPool (*createDescriptorPool)(uint32_t texturesCount, VkDevice device);
+    VkDescriptorSetLayout (*createDescriptorSetLayout)(VkDevice device);
+    VkDescriptorPool (*createDescriptorPool)(VkDevice device);
     void (*bindBuffersToDescriptorSets)(VkDescriptorSet descriptorSets[], VkDevice device, VkBuffer uniformBuffers[], struct Model model);
 };
 
 
 #include "modelLoader.h"
-struct ModelBuilder object(struct ModelBuilder a);
-struct ModelBuilder interface(struct ModelBuilder a);
+
+VkDescriptorPool createTextureDescriptorPool(VkDevice device, uint32_t texturesCount);
+VkDescriptorSetLayout createTextureDescriptorSetLayout(VkDevice device, uint32_t textureQuantity);
+void bindTextureBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, uint32_t texturesQuantity, struct Textures *texture);
+
+VkDescriptorPool createObjectDescriptorPool(VkDevice device);
+VkDescriptorSetLayout createObjectDescriptorSetLayout(VkDevice device);
+void bindObjectBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, struct Model model);
+
+VkDescriptorPool createCameraDescriptorPool(VkDevice device);
+VkDescriptorSetLayout createCameraDescriptorSetLayout(VkDevice device);
+void bindCameraBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, VkBuffer uniformBuffers[]);
 
 #endif

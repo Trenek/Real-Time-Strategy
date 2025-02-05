@@ -9,7 +9,7 @@
 
 void pause(struct VulkanTools *vulkan, enum state *state, uint16_t modelQuantity, struct Model model[modelQuantity]) {
     struct Model pauseModel[modelQuantity + 1];
-    pauseModel[0] = /*buttons*/ createModels(interface(objLoader((struct ModelBuilder) {
+    pauseModel[0] = /*buttons*/ createModels(objLoader((struct ModelBuilder) {
         .instanceCount = 2,
         .texturesQuantity = 2,
         .texturesPath = (const char *[]){ "textures/exit.jpg", "textures/pause.png" },
@@ -18,7 +18,7 @@ void pause(struct VulkanTools *vulkan, enum state *state, uint16_t modelQuantity
         .fragmentShader = "shaders/frag2d.spv",
         .minDepth = 0.0f,
         .maxDepth = 1.0f
-    })), &vulkan->graphics);
+    }), &vulkan->graphics);
 
     memcpy(pauseModel + 1, model, sizeof(struct Model) * modelQuantity);
 

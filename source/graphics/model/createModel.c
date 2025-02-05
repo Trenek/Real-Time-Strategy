@@ -20,16 +20,6 @@ struct Textures loadTexture(const char *texturePath, VkDevice device, VkPhysical
 struct Model createModels(struct ModelBuilder modelBuilder, struct GraphicsSetup *vulkan) {
     struct Model result = { 0 };
 
-    result.graphics.descriptorSetLayout = modelBuilder.createDescriptorSetLayout(vulkan->device, modelBuilder.texturesQuantity); // type
-    result.graphics.pipelineLayout = createPipelineLayout(vulkan->device, result.graphics.descriptorSetLayout);
-    result.graphics.graphicsPipeline = createGraphicsPipeline(modelBuilder.vertexShader, modelBuilder.fragmentShader, modelBuilder.minDepth, modelBuilder.maxDepth, vulkan->device, vulkan->renderPass, result.graphics.pipelineLayout, vulkan->msaaSamples);
-
-    result.texturesQuantity = modelBuilder.texturesQuantity;
-    result.texture = malloc(result.texturesQuantity * sizeof(struct Textures));
-    for (uint32_t i = 0; i < result.texturesQuantity; i += 1) {
-        result.texture[i] = loadTexture(modelBuilder.texturesPath[i], vulkan->device, vulkan->physicalDevice, vulkan->surface, vulkan->commandPool, vulkan->transferQueue);
-    }
-
     createStorageBuffer(modelBuilder.instanceCount * sizeof(struct instanceBuffer), result.graphics.uniformModelBuffers, result.graphics.uniformModelBuffersMemory, result.graphics.uniformModelBuffersMapped, vulkan->device, vulkan->physicalDevice, vulkan->surface);
     result.instanceBuffer = malloc(modelBuilder.instanceCount * sizeof(struct instanceBuffer));
 
@@ -49,9 +39,24 @@ struct Model createModels(struct ModelBuilder modelBuilder, struct GraphicsSetup
         result.mesh[i].indexBuffer = createIndexBuffer(&result.mesh[i].indexBufferMemory, vulkan->device, vulkan->physicalDevice, vulkan->surface, vulkan->commandPool, vulkan->transferQueue, result.mesh[i].verticesQuantity, result.mesh[i].indicesQuantity, result.mesh[i].indices);
     }
 
-    result.graphics.descriptorPool = modelBuilder.createDescriptorPool(result.texturesQuantity, vulkan->device);
-    createDescriptorSets(result.graphics.descriptorSets, vulkan->device, result.graphics.descriptorPool, result.graphics.descriptorSetLayout);
-    modelBuilder.bindBuffersToDescriptorSets(result.graphics.descriptorSets, vulkan->device, vulkan->uniformBuffers, result);
+    result.texturesQuantity = modelBuilder.texturesQuantity;
+    result.texture = malloc(result.texturesQuantity * sizeof(struct Textures));
+    for (uint32_t i = 0; i < result.texturesQuantity; i += 1) {
+        result.texture[i] = loadTexture(modelBuilder.texturesPath[i], vulkan->device, vulkan->physicalDevice, vulkan->surface, vulkan->commandPool, vulkan->transferQueue);
+    }
+
+    result.graphics.textureDescriptorSetLayout = createTextureDescriptorSetLayout(vulkan->device, modelBuilder.texturesQuantity);
+    result.graphics.textureDescriptorPool = createTextureDescriptorPool(vulkan->device, modelBuilder.texturesQuantity);
+    createDescriptorSets(result.graphics.textureDescriptorSet, vulkan->device, result.graphics.textureDescriptorPool, result.graphics.textureDescriptorSetLayout);
+    bindTextureBuffersToDescriptorSets(result.graphics.textureDescriptorSet, vulkan->device, result.texturesQuantity, result.texture);
+
+    result.graphics.objectDescriptorSetLayout = createObjectDescriptorSetLayout(vulkan->device);
+    result.graphics.objectDescriptorPool = createObjectDescriptorPool(vulkan->device);
+    createDescriptorSets(result.graphics.objectDescriptorSets, vulkan->device, result.graphics.objectDescriptorPool, result.graphics.objectDescriptorSetLayout);
+    bindObjectBuffersToDescriptorSets(result.graphics.objectDescriptorSets, vulkan->device, result);
+
+    result.graphics.pipelineLayout = createPipelineLayout(vulkan->device, result.graphics.objectDescriptorSetLayout, result.graphics.textureDescriptorSetLayout, vulkan->cameraDescriptorSetLayout);
+    result.graphics.graphicsPipeline = createGraphicsPipeline(modelBuilder.vertexShader, modelBuilder.fragmentShader, modelBuilder.minDepth, modelBuilder.maxDepth, vulkan->device, vulkan->renderPass, result.graphics.pipelineLayout, vulkan->msaaSamples);
 
     return result;
 }
@@ -92,8 +97,12 @@ static void destroyModels(VkDevice device, struct Model model) {
 
     vkDestroyPipeline(device, model.graphics.graphicsPipeline, NULL);
     vkDestroyPipelineLayout(device, model.graphics.pipelineLayout, NULL);
-    vkDestroyDescriptorPool(device, model.graphics.descriptorPool, NULL);
-    vkDestroyDescriptorSetLayout(device, model.graphics.descriptorSetLayout, NULL);
+
+    vkDestroyDescriptorPool(device, model.graphics.objectDescriptorPool, NULL);
+    vkDestroyDescriptorSetLayout(device, model.graphics.objectDescriptorSetLayout, NULL);
+
+    vkDestroyDescriptorPool(device, model.graphics.textureDescriptorPool, NULL);
+    vkDestroyDescriptorSetLayout(device, model.graphics.textureDescriptorSetLayout, NULL);
 }
 
 

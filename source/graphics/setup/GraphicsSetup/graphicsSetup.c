@@ -4,6 +4,7 @@
 #include "graphicsSetup.h"
 
 #include "definitions.h"
+#include "descriptor.h"
 
 static void cleanupSwapChain(struct GraphicsSetup *vulkan) {
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
@@ -70,6 +71,11 @@ struct GraphicsSetup setupGraphics(GLFWwindow *window) {
 
     createUniformBuffers(vulkan.uniformBuffers, vulkan.uniformBuffersMemory, vulkan.uniformBuffersMapped, vulkan.device, vulkan.physicalDevice, vulkan.surface);
 
+    vulkan.cameraDescriptorPool = createCameraDescriptorPool(vulkan.device);
+    vulkan.cameraDescriptorSetLayout = createCameraDescriptorSetLayout(vulkan.device);
+    createDescriptorSets(vulkan.cameraDescriptorSet, vulkan.device, vulkan.cameraDescriptorPool, vulkan.cameraDescriptorSetLayout);
+    bindCameraBuffersToDescriptorSets(vulkan.cameraDescriptorSet, vulkan.device, vulkan.uniformBuffers);
+
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
         vulkan.imageAvailableSemaphore[i] = createSemaphore(vulkan.device);
         vulkan.renderFinishedSemaphore[i] = createSemaphore(vulkan.device);
@@ -87,6 +93,9 @@ void cleanupGraphics(struct GraphicsSetup vulkan) {
         vkDestroySemaphore(vulkan.device, vulkan.renderFinishedSemaphore[i], NULL);
         vkDestroyFence(vulkan.device, vulkan.inFlightFence[i], NULL);
     }
+
+    vkDestroyDescriptorPool(vulkan.device, vulkan.cameraDescriptorPool, NULL);
+    vkDestroyDescriptorSetLayout(vulkan.device, vulkan.cameraDescriptorSetLayout, NULL);
 
     vkDestroyImageView(vulkan.device, vulkan.colorImageView, NULL);
     vkDestroyImage(vulkan.device, vulkan.colorImage, NULL);

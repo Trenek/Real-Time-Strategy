@@ -53,7 +53,6 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 
 add_custom_target(shaders DEPENDS
     ${CMAKE_SOURCE_DIR}/shaders/shader.frag
-    ${CMAKE_SOURCE_DIR}/shaders/shader2.frag
     ${CMAKE_SOURCE_DIR}/shaders/shader.vert
     ${CMAKE_SOURCE_DIR}/textures
     ${CMAKE_SOURCE_DIR}/models
@@ -62,7 +61,6 @@ add_custom_target(shaders DEPENDS
 add_custom_command(TARGET shaders POST_BUILD
     COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader.vert -o ${CMAKE_BINARY_DIR}/shaders/vert.spv
     COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader.frag -o ${CMAKE_BINARY_DIR}/shaders/frag.spv
-    COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader2.frag -o ${CMAKE_BINARY_DIR}/shaders/frag2.spv
     COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader2d.frag -o ${CMAKE_BINARY_DIR}/shaders/frag2d.spv
     COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/shader2d.vert -o ${CMAKE_BINARY_DIR}/shaders/vert2d.spv
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/textures ${CMAKE_BINARY_DIR}/textures

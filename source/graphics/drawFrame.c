@@ -79,7 +79,12 @@ static void recordCommandBuffer(VkCommandBuffer commandBuffer, VkFramebuffer swa
     for (uint32_t i = 0; i < modelQuantity; i += 1) {
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, model[i].graphics.graphicsPipeline);
 
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, model[i].graphics.pipelineLayout, 0, 1, &model[i].graphics.descriptorSets[currentFrame], 0, NULL);
+        VkDescriptorSet sets[] = {
+            model[i].graphics.objectDescriptorSets[currentFrame],
+            model[i].graphics.textureDescriptorSet[currentFrame],
+            vulkan->graphics.cameraDescriptorSet[currentFrame]
+        };
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, model[i].graphics.pipelineLayout, 0, 3, sets, 0, NULL);
         for (uint32_t j = 0; j < model[i].meshQuantity; j += 1) {
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, &model[i].mesh[j].vertexBuffer, (VkDeviceSize[]){ 0 });
             vkCmdBindIndexBuffer(commandBuffer, model[i].mesh[j].indexBuffer, 0, VK_INDEX_TYPE_UINT16);
