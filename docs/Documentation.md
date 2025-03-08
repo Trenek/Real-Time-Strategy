@@ -66,5 +66,5 @@
 ## Użyte wzorce projektowe
   Klasy `VulkanTools` i `Model` stanowią fasady.
   Klasy `ModelBuilder`, `fighterRange`, `fighterAttack` i `fighterDestination` reprezentują wzorzec Builder
-## Diagram Klas
+## Diagram Klas [[outdated]]
 ![Wzorce Projektowe](https://github.com/user-attachments/assets/7393aacf-5bfe-44ac-adb9-739fc06070db)
