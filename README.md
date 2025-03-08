@@ -2,6 +2,10 @@
 Projekt jest grą strategiczną typu Real Time Strategy.
 
 ## Budowanie projektu
+Na samym początku należy pobrać zależności zewnętrzne za pomocą komend
+* `git submodule init`
+* `git submodule update`
+
 Projekt można skompilować korzystając z narzędzia Cmake w połączeniu z kompilatorem MinGW.
 Dodatkowo do kompilacji potrzebne będzie Vulkan SDK https://vulkan.lunarg.com/sdk/home
 Projekt można uruchomić/skompilować za pomocą skryptów `buildDebug.bat`, `buildRelease.bat` i `run.bat`
