@@ -83,7 +83,8 @@ VkDevice createLogicalDevice(VkSurfaceKHR surface, VkPhysicalDevice physicalDevi
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
         .pNext = &indexingFeature,
         .features = {
-            .samplerAnisotropy = VK_TRUE
+            .samplerAnisotropy = VK_TRUE,
+            .depthBounds = VK_TRUE
         },
     };
 

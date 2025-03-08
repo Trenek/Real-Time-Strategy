@@ -8,7 +8,6 @@
 #include "bufferOperations.h"
 
 #include "definitions.h"
-#include "uniformBufferObject.h"
 
 VkBuffer createVertexBuffer(VkDeviceMemory *vertexBufferMemory, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, VkCommandPool transferCommandPool, VkQueue transferQueue, uint32_t vertexQuantity, struct Vertex vertices[static vertexQuantity]) {
     VkBuffer vertexBuffer = NULL;

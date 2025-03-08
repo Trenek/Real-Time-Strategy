@@ -120,7 +120,7 @@ VkInstance createInstance([[maybe_unused]] VkDebugUtilsMessengerEXT *debugMessen
         .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
         .pEngineName = "No Engine",
         .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-        .apiVersion = VK_API_VERSION_1_1
+        .apiVersion = VK_API_VERSION_1_3
     };
 
     uint32_t extensionCount = 0;

@@ -6,6 +6,8 @@
 #include "definitions.h"
 #include "swapChain.h"
 
+#include "model.h"
+
 struct GraphicsSetup {
     VkInstance instance;
     VkDebugUtilsMessengerEXT debugMessenger;
@@ -48,7 +50,12 @@ struct GraphicsSetup {
     VkDescriptorSetLayout cameraDescriptorSetLayout;
     VkDescriptorPool cameraDescriptorPool;
     VkDescriptorSet cameraDescriptorSet[MAX_FRAMES_IN_FLIGHT];
+
+    struct descriptor textureDescriptor;
 };
+
+
+typedef struct GLFWwindow GLFWwindow;
 
 void recreateSwapChainGraphics(GLFWwindow *window, struct GraphicsSetup *vulkan);
 struct GraphicsSetup setupGraphics(GLFWwindow *window);

@@ -30,33 +30,40 @@ struct Mesh {
     VkDeviceMemory indexBufferMemory;
 };
 
+struct buffer {
+    VkBuffer buffers[MAX_FRAMES_IN_FLIGHT];
+    VkDeviceMemory buffersMemory[MAX_FRAMES_IN_FLIGHT];
+    void *buffersMapped[MAX_FRAMES_IN_FLIGHT];
+};
+
+struct descriptor {
+    VkDescriptorSetLayout descriptorSetLayout;
+    VkDescriptorPool descriptorPool;
+    VkDescriptorSet descriptorSets[MAX_FRAMES_IN_FLIGHT];
+};
+
+struct actualModel {
+    struct buffer localMesh;
+
+    uint32_t meshQuantity;
+    struct Mesh *mesh;
+};
+
 struct Model {
     uint32_t instanceCount;
     struct instance *instance;
     struct instanceBuffer *instanceBuffer;
 
-    uint32_t meshQuantity;
-    struct Mesh *mesh;
-
+    uint32_t texturePointer;
     uint32_t texturesQuantity;
-    struct Textures *texture;
+
+    struct actualModel *actualModel;
 
     struct ModelGraphics {
-        VkBuffer localMeshBuffers[MAX_FRAMES_IN_FLIGHT];
-        VkDeviceMemory localMeshBuffersMemory[MAX_FRAMES_IN_FLIGHT];
-        void *localMeshBuffersMapped[MAX_FRAMES_IN_FLIGHT];
+        struct buffer uniformModel;
 
-        VkBuffer uniformModelBuffers[MAX_FRAMES_IN_FLIGHT];
-        VkDeviceMemory uniformModelBuffersMemory[MAX_FRAMES_IN_FLIGHT];
-        void *uniformModelBuffersMapped[MAX_FRAMES_IN_FLIGHT];
-
-        VkDescriptorSetLayout objectDescriptorSetLayout;
-        VkDescriptorPool objectDescriptorPool;
-        VkDescriptorSet objectDescriptorSets[MAX_FRAMES_IN_FLIGHT];
-
-        VkDescriptorSetLayout textureDescriptorSetLayout;
-        VkDescriptorPool textureDescriptorPool;
-        VkDescriptorSet textureDescriptorSet[MAX_FRAMES_IN_FLIGHT];
+        struct descriptor object;
+        struct descriptor *texture;
 
         VkPipelineLayout pipelineLayout;
         VkPipeline graphicsPipeline;
@@ -65,6 +72,11 @@ struct Model {
 
 struct GraphicsSetup;
 struct Model createModels(struct ModelBuilder modelBuilder, struct GraphicsSetup *vulkan);
+
 void destroyModelArray(uint16_t num, struct Model modelArray[num], struct GraphicsSetup *graphics);
+void destroyActualModels(VkDevice device, uint32_t modelQuantity, struct actualModel *model);
+
+struct Textures *loadTextures(struct descriptor *textureDescr, struct GraphicsSetup *vulkan, uint32_t texturesQuantity, const char *texturePath[static texturesQuantity]);
+void unloadTextures(VkDevice device, uint32_t texturesQuantity, struct Textures texture[texturesQuantity], struct descriptor textureDesc);
 
 #endif

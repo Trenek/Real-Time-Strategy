@@ -78,6 +78,7 @@ static bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
     freeSwapChainSupportDetails(&swapChainSupport);
 
     return
+        deviceFeatures.depthBounds &&
         deviceFeatures.samplerAnisotropy &&
         checkDeviceExtensionSupport(device) &&
         swapChainAdequate &&

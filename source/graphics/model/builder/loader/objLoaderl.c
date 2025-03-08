@@ -130,7 +130,7 @@ static void get_file_data(void* ctx, const char* filename, [[maybe_unused]] cons
     }
 }
 
-static void loadModel(const char *objectPath, struct Model *model, [[maybe_unused]] VkDevice device, [[maybe_unused]] VkPhysicalDevice physicalDevice, [[maybe_unused]] VkSurfaceKHR surface) {
+static void loadModel(const char *objectPath, struct actualModel *model, [[maybe_unused]] VkDevice device, [[maybe_unused]] VkPhysicalDevice physicalDevice, [[maybe_unused]] VkSurfaceKHR surface) {
     tinyobj_attrib_t attrib;
     tinyobj_shape_t *shapes;
     size_t num_shapes = 0;
@@ -213,17 +213,13 @@ static void loadModel(const char *objectPath, struct Model *model, [[maybe_unuse
         model->mesh[0].indices[i] = attrib.faces[i].v_idx;
     }
 #endif
-    if (device != NULL) // for tests
-    createStorageBuffer(model->meshQuantity * sizeof(mat4), model->graphics.localMeshBuffers, model->graphics.localMeshBuffersMemory, model->graphics.localMeshBuffersMapped, device, physicalDevice, surface);
+    createStorageBuffer(model->meshQuantity * sizeof(mat4), model->localMesh.buffers, model->localMesh.buffersMemory, model->localMesh.buffersMapped, device, physicalDevice, surface);
 
-    if (device != NULL) // for tests
     for (uint32_t k = 0; k < MAX_FRAMES_IN_FLIGHT; k += 1) {
-        glm_mat4_identity(((mat4 **)model->graphics.localMeshBuffersMapped)[k][0]);
+        glm_mat4_identity(((mat4 **)model->localMesh.buffersMapped)[k][0]);
     }
 }
 
-struct ModelBuilder objLoader(struct ModelBuilder a) {
-    a.loadModel = loadModel;
-
-    return a;
+void objLoadModel(const char *filePath, struct actualModel *model, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) {
+    loadModel(filePath, model, device, physicalDevice, surface);
 }

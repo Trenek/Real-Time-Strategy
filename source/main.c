@@ -7,7 +7,7 @@
 
 int main(void) {
     struct VulkanTools vulkan = setup();
-    void (*state[])(struct VulkanTools *vulkan, enum state *state) = {
+    void (* const state[])(struct VulkanTools *vulkan, enum state *state) = {
         [MAIN_MENU] = menu,
         [GAME] = game,
         [WIN] = win,

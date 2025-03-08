@@ -21,6 +21,7 @@ set(SOURCE_DIRECTORIES
                 "${CMAKE_CURRENT_SOURCE_DIR}/graphics/model/builder/loader"
                 "${CMAKE_CURRENT_SOURCE_DIR}/graphics/model/builder/type"
             "${CMAKE_CURRENT_SOURCE_DIR}/graphics/model/functions"
+            "${CMAKE_CURRENT_SOURCE_DIR}/graphics/model/descriptors"
     "${CMAKE_CURRENT_SOURCE_DIR}/basicThings"
     "${CMAKE_CURRENT_SOURCE_DIR}/state"
     "${CMAKE_CURRENT_SOURCE_DIR}/button"

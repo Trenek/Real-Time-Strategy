@@ -7,20 +7,10 @@
 #include "modelFunctions.h"
 #include "instanceBuffer.h"
 
-struct Textures loadTexture(const char *texturePath, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, VkCommandPool commandPool, VkQueue queue) {
-    struct Textures result = { 0 };
-
-    result.image = createTextureBuffer(&result.imageMemory, &result.mipLevels, texturePath, device, physicalDevice, surface, commandPool, queue);
-    result.imageView = createTextureImageView(device, result.image, result.mipLevels);
-    result.sampler = createTextureSampler(device, physicalDevice, result.mipLevels);
-
-    return result;
-}
-
 struct Model createModels(struct ModelBuilder modelBuilder, struct GraphicsSetup *vulkan) {
     struct Model result = { 0 };
 
-    createStorageBuffer(modelBuilder.instanceCount * sizeof(struct instanceBuffer), result.graphics.uniformModelBuffers, result.graphics.uniformModelBuffersMemory, result.graphics.uniformModelBuffersMapped, vulkan->device, vulkan->physicalDevice, vulkan->surface);
+    createStorageBuffer(modelBuilder.instanceCount * sizeof(struct instanceBuffer), result.graphics.uniformModel.buffers, result.graphics.uniformModel.buffersMemory, result.graphics.uniformModel.buffersMapped, vulkan->device, vulkan->physicalDevice, vulkan->surface);
     result.instanceBuffer = malloc(modelBuilder.instanceCount * sizeof(struct instanceBuffer));
 
     result.instanceCount = modelBuilder.instanceCount;
@@ -32,79 +22,56 @@ struct Model createModels(struct ModelBuilder modelBuilder, struct GraphicsSetup
         };
     }
 
-    modelBuilder.loadModel(modelBuilder.modelPath, &result, vulkan->device, vulkan->physicalDevice, vulkan->surface);
-
-    for (uint32_t i = 0; i < result.meshQuantity; i += 1) {
-        result.mesh[i].vertexBuffer = createVertexBuffer(&result.mesh[i].vertexBufferMemory, vulkan->device, vulkan->physicalDevice, vulkan->surface, vulkan->commandPool, vulkan->transferQueue, result.mesh[i].verticesQuantity, result.mesh[i].vertices);
-        result.mesh[i].indexBuffer = createIndexBuffer(&result.mesh[i].indexBufferMemory, vulkan->device, vulkan->physicalDevice, vulkan->surface, vulkan->commandPool, vulkan->transferQueue, result.mesh[i].verticesQuantity, result.mesh[i].indicesQuantity, result.mesh[i].indices);
-    }
-
+    result.texturePointer = modelBuilder.texturePointer;
     result.texturesQuantity = modelBuilder.texturesQuantity;
-    result.texture = malloc(result.texturesQuantity * sizeof(struct Textures));
-    for (uint32_t i = 0; i < result.texturesQuantity; i += 1) {
-        result.texture[i] = loadTexture(modelBuilder.texturesPath[i], vulkan->device, vulkan->physicalDevice, vulkan->surface, vulkan->commandPool, vulkan->transferQueue);
-    }
+    result.graphics.texture = modelBuilder.texture;
 
-    result.graphics.textureDescriptorSetLayout = createTextureDescriptorSetLayout(vulkan->device, modelBuilder.texturesQuantity);
-    result.graphics.textureDescriptorPool = createTextureDescriptorPool(vulkan->device, modelBuilder.texturesQuantity);
-    createDescriptorSets(result.graphics.textureDescriptorSet, vulkan->device, result.graphics.textureDescriptorPool, result.graphics.textureDescriptorSetLayout);
-    bindTextureBuffersToDescriptorSets(result.graphics.textureDescriptorSet, vulkan->device, result.texturesQuantity, result.texture);
+    result.actualModel = modelBuilder.modelPath;
 
-    result.graphics.objectDescriptorSetLayout = createObjectDescriptorSetLayout(vulkan->device);
-    result.graphics.objectDescriptorPool = createObjectDescriptorPool(vulkan->device);
-    createDescriptorSets(result.graphics.objectDescriptorSets, vulkan->device, result.graphics.objectDescriptorPool, result.graphics.objectDescriptorSetLayout);
-    bindObjectBuffersToDescriptorSets(result.graphics.objectDescriptorSets, vulkan->device, result);
+    result.graphics.object.descriptorSetLayout = createObjectDescriptorSetLayout(vulkan->device);
+    result.graphics.object.descriptorPool = createObjectDescriptorPool(vulkan->device);
+    createDescriptorSets(result.graphics.object.descriptorSets, vulkan->device, result.graphics.object.descriptorPool, result.graphics.object.descriptorSetLayout);
+    bindObjectBuffersToDescriptorSets(result.graphics.object.descriptorSets, vulkan->device, result, result.actualModel);
 
-    result.graphics.pipelineLayout = createPipelineLayout(vulkan->device, result.graphics.objectDescriptorSetLayout, result.graphics.textureDescriptorSetLayout, vulkan->cameraDescriptorSetLayout);
+    result.graphics.pipelineLayout = createPipelineLayout(vulkan->device, result.graphics.object.descriptorSetLayout, modelBuilder.texture->descriptorSetLayout, vulkan->cameraDescriptorSetLayout);
     result.graphics.graphicsPipeline = createGraphicsPipeline(modelBuilder.vertexShader, modelBuilder.fragmentShader, modelBuilder.minDepth, modelBuilder.maxDepth, vulkan->device, vulkan->renderPass, result.graphics.pipelineLayout, vulkan->msaaSamples);
 
     return result;
 }
 
-void unloadTexture(VkDevice device, struct Textures texture) {
-    vkDestroySampler(device, texture.sampler, NULL);
-    vkDestroyImageView(device, texture.imageView, NULL);
-
-    vkDestroyImage(device, texture.image, NULL);
-    vkFreeMemory(device, texture.imageMemory, NULL);
-}
-
+[[maybe_unused]]
 static void unloadMesh(struct Vertex *vertices, uint16_t *indices) {
     free(vertices);
     free(indices);
 }
 
+void destroyActualModels(VkDevice device, uint32_t modelQuantity, struct actualModel *model) {
+    for (uint32_t i = 0; i < modelQuantity; i += 1) {
+        for (uint32_t j = 0; j < model[i].meshQuantity; j += 1) {
+            destroyBuffer(device, model[i].mesh[j].indexBuffer, model[i].mesh[j].indexBufferMemory);
+            destroyBuffer(device, model[i].mesh[j].vertexBuffer, model[i].mesh[j].vertexBufferMemory);
+        }
+
+        for (uint32_t j = 0; j < model[i].meshQuantity; j += 1) {
+            unloadMesh(model[i].mesh[j].vertices, model[i].mesh[j].indices);
+        }
+        free(model[i].mesh);
+
+        destroyStorageBuffer(device, model[i].localMesh.buffers, model[i].localMesh.buffersMemory);
+    }
+}
+
 static void destroyModels(VkDevice device, struct Model model) {
     free(model.instance);
 
-    for (uint32_t i = 0; i < model.meshQuantity; i += 1) {
-        destroyBuffer(device, model.mesh[i].indexBuffer, model.mesh[i].indexBufferMemory);
-        destroyBuffer(device, model.mesh[i].vertexBuffer, model.mesh[i].vertexBufferMemory);
-    }
-
-    for (uint32_t i = 0; i < model.texturesQuantity; i += 1) {
-        unloadTexture(device, model.texture[i]);
-    }
-    free(model.texture);
-
-    for (uint32_t i = 0; i < model.meshQuantity; i += 1) {
-        unloadMesh(model.mesh[i].vertices, model.mesh[i].indices);
-    }
-    free(model.mesh);
-
-    destroyStorageBuffer(device, model.graphics.uniformModelBuffers, model.graphics.uniformModelBuffersMemory);
-    destroyStorageBuffer(device, model.graphics.localMeshBuffers, model.graphics.localMeshBuffersMemory);
+    destroyStorageBuffer(device, model.graphics.uniformModel.buffers, model.graphics.uniformModel.buffersMemory);
 
     vkDestroyPipeline(device, model.graphics.graphicsPipeline, NULL);
     vkDestroyPipelineLayout(device, model.graphics.pipelineLayout, NULL);
 
-    vkDestroyDescriptorPool(device, model.graphics.objectDescriptorPool, NULL);
-    vkDestroyDescriptorSetLayout(device, model.graphics.objectDescriptorSetLayout, NULL);
-
-    vkDestroyDescriptorPool(device, model.graphics.textureDescriptorPool, NULL);
-    vkDestroyDescriptorSetLayout(device, model.graphics.textureDescriptorSetLayout, NULL);
+    vkDestroyDescriptorPool(device, model.graphics.object.descriptorPool, NULL);
+    vkDestroyDescriptorSetLayout(device, model.graphics.object.descriptorSetLayout, NULL);
 }
-
 
 void destroyModelArray(uint16_t num, struct Model modelArray[num], struct GraphicsSetup *graphics) {
     vkDeviceWaitIdle(graphics->device);

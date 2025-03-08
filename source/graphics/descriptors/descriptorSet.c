@@ -1,11 +1,7 @@
 #include <vulkan/vulkan.h>
 
 #include "MY_ASSERT.h"
-#include "model.h"
 #include "definitions.h"
-
-#include "uniformBufferObject.h"
-#include "instanceBuffer.h"
 
 void fillArray(int num, VkDescriptorSetLayout layouts[], VkDescriptorSetLayout elem) {
     while (num --> 0) {

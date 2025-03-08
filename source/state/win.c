@@ -6,18 +6,43 @@
 #include "button.h"
 #include "instanceBuffer.h"
 
+#include "modelFunctions.h"
+
 void win(struct VulkanTools *vulkan, enum state *state) {
+    const char *texturePaths[] = {
+        "textures/win.jpg"
+    };
+
+    struct descriptor textureDesc;
+    struct Textures *textures = loadTextures(&textureDesc, &vulkan->graphics, sizeof(texturePaths) / sizeof(const char *), texturePaths);
+
+    [[maybe_unused]]
+    const char *modelPath[] = {
+        "models/my_model2d.obj",
+    };
+
+    struct actualModel actualModel[sizeof(modelPath) / sizeof(const char *)];
+    
+    objLoadModel(modelPath[0], &actualModel[0], vulkan->graphics.device, vulkan->graphics.physicalDevice, vulkan->graphics.surface);
+
+    for (uint32_t j = 0; j < sizeof(actualModel) / sizeof(struct actualModel); j += 1)
+    for (uint32_t i = 0; i < actualModel[j].meshQuantity; i += 1) {
+        actualModel[j].mesh[i].vertexBuffer = createVertexBuffer(&actualModel[j].mesh[i].vertexBufferMemory, vulkan->graphics.device, vulkan->graphics.physicalDevice, vulkan->graphics.surface, vulkan->graphics.commandPool, vulkan->graphics.transferQueue, actualModel[j].mesh[i].verticesQuantity, actualModel[j].mesh[i].vertices);
+        actualModel[j].mesh[i].indexBuffer = createIndexBuffer(&actualModel[j].mesh[i].indexBufferMemory, vulkan->graphics.device, vulkan->graphics.physicalDevice, vulkan->graphics.surface, vulkan->graphics.commandPool, vulkan->graphics.transferQueue, actualModel[j].mesh[i].verticesQuantity, actualModel[j].mesh[i].indicesQuantity, actualModel[j].mesh[i].indices);
+    }
+
     struct Model model[] = {
-        /*background*/ createModels(objLoader((struct ModelBuilder) {
+        /*background*/ createModels((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
-            .texturesPath = (const char *[]){ "textures/win.jpg" },
-            .modelPath = "models/my_model2d.obj",
+            .texturePointer = 0,
+            .texture = &textureDesc,
+            .modelPath = &actualModel[0],
             .vertexShader = "shaders/vert2d.spv",
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        }), &vulkan->graphics),
+        }, &vulkan->graphics),
     };
 
     *model[0].instance = (struct instance){
@@ -39,4 +64,6 @@ void win(struct VulkanTools *vulkan, enum state *state) {
     }
 
     destroyModelArray(sizeof(model) / sizeof(struct Model), model, &vulkan->graphics);
+    destroyActualModels(vulkan->graphics.device, sizeof(actualModel) / sizeof(struct actualModel), actualModel);
+    unloadTextures(vulkan->graphics.device, sizeof(texturePaths) / sizeof(const char *), textures, textureDesc);
 }

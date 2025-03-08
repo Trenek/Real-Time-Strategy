@@ -43,8 +43,8 @@ void setPosition(struct Model model, uint32_t num, struct warrior warrior[num]);
 void highlightCohort(struct cohort *cohort, bool isOn);
 bool isClicked(struct VulkanTools *vulkan, struct cohort *this);
 
-struct Model warriors(uint16_t instanceCount, struct GraphicsSetup *vulkan);
-struct Model enemy(uint16_t instanceCount, struct GraphicsSetup *vulkan);
+struct Model warriors(uint16_t instanceCount, struct GraphicsSetup *vulkan, struct descriptor *textureDescriptor, struct actualModel *actualModel);
+struct Model enemy(uint16_t instanceCount, struct GraphicsSetup *vulkan, struct descriptor *textureDescriptor, struct actualModel *actualModel);
 
 void attackCohord(struct cohort *cohort, float deltaTime);
 

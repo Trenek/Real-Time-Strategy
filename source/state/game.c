@@ -11,6 +11,8 @@
 #include "cohord.h"
 #include "army.h"
 
+#include "modelFunctions.h"
+
 struct button createArmyButtons(struct button button, struct army *army) {
     for (uint16_t i = 0; i < army->cohortCount; i += 1) {
         button.info[i] = (struct ButtonInfo) {
@@ -56,8 +58,7 @@ void game(struct VulkanTools *vulkan, enum state *state) {
     uint32_t num = 10;
     uint32_t instanceCount = num * num;
 
-    [[maybe_unused]]
-    const char *textures[] = {
+    const char *texturePaths[] = {
         "textures/pause.png",
         "textures/grass.jpg",
         "textures/texture.jpg",
@@ -70,63 +71,88 @@ void game(struct VulkanTools *vulkan, enum state *state) {
         "textures/enemyWarrior2/high.jpg", "textures/enemyWarrior2/mid.jpg", "textures/enemyWarrior2/low.jpg",
         "textures/enemyWarrior3/high.jpg", "textures/enemyWarrior3/mid.jpg", "textures/enemyWarrior3/low.jpg",
     };
+    size_t texturesQuantity = sizeof(texturePaths) / sizeof(const char *);
+
+    struct descriptor textureDesc;
+    struct Textures *textureData = loadTextures(&textureDesc, &vulkan->graphics, texturesQuantity, texturePaths);
+
+    [[maybe_unused]]
+    const char *modelPath[] = {
+        "models/my_model2d.obj",
+        "models/my_floor.obj",
+        "models/cylinder.glb"
+    };
+
+    struct actualModel actualModel[sizeof(modelPath) / sizeof(const char *)];
+    
+    objLoadModel(modelPath[0], &actualModel[0], vulkan->graphics.device, vulkan->graphics.physicalDevice, vulkan->graphics.surface);
+    objLoadModel(modelPath[1], &actualModel[1], vulkan->graphics.device, vulkan->graphics.physicalDevice, vulkan->graphics.surface);
+    gltfLoadModel(modelPath[2], &actualModel[2], vulkan->graphics.device, vulkan->graphics.physicalDevice, vulkan->graphics.surface);
+
+    for (uint32_t j = 0; j < sizeof(actualModel) / sizeof(struct actualModel); j += 1)
+    for (uint32_t i = 0; i < actualModel[j].meshQuantity; i += 1) {
+        actualModel[j].mesh[i].vertexBuffer = createVertexBuffer(&actualModel[j].mesh[i].vertexBufferMemory, vulkan->graphics.device, vulkan->graphics.physicalDevice, vulkan->graphics.surface, vulkan->graphics.commandPool, vulkan->graphics.transferQueue, actualModel[j].mesh[i].verticesQuantity, actualModel[j].mesh[i].vertices);
+        actualModel[j].mesh[i].indexBuffer = createIndexBuffer(&actualModel[j].mesh[i].indexBufferMemory, vulkan->graphics.device, vulkan->graphics.physicalDevice, vulkan->graphics.surface, vulkan->graphics.commandPool, vulkan->graphics.transferQueue, actualModel[j].mesh[i].verticesQuantity, actualModel[j].mesh[i].indicesQuantity, actualModel[j].mesh[i].indices);
+    }
 
     struct Model model[] = {
-        /*buttons*/ createModels(objLoader((struct ModelBuilder) {
+        /*buttons*/ createModels((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
-            .texturesPath = (const char *[]){ "textures/pause.png" },
-            .modelPath = "models/my_model2d.obj",
+            .texturePointer = 0,
+            .texture = &textureDesc,
+            .modelPath = &actualModel[0],
             .vertexShader = "shaders/vert2d.spv",
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        }), &vulkan->graphics),
-        /*floor*/ createModels(objLoader((struct ModelBuilder) {
+        }, &vulkan->graphics),
+        /*floor*/ createModels((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
-            .texturesPath = (const char *[]){ "textures/grass.jpg" },
-            .modelPath = "models/my_floor.obj",
+            .texturePointer = 1,
+            .texture = &textureDesc,
+            .modelPath = &actualModel[1],
             .vertexShader = "shaders/vert.spv",
             .fragmentShader = "shaders/frag.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        }), &vulkan->graphics),
-        /*background*/ createModels(objLoader((struct ModelBuilder) {
+        }, &vulkan->graphics),
+        /*background*/ createModels((struct ModelBuilder) {
             .instanceCount = 1,
             .texturesQuantity = 1,
-            .texturesPath = (const char *[]){ "textures/texture.jpg" },
-            .modelPath = "models/my_model2d.obj",
+            .texturePointer = 2,
+            .texture = &textureDesc,
+            .modelPath = &actualModel[0],
             .vertexShader = "shaders/vert2d.spv",
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 1.0f,
             .maxDepth = 1.0f
-        }), &vulkan->graphics),
-        /*buttons*/ createModels(objLoader((struct ModelBuilder) {
+        }, &vulkan->graphics),
+        /*buttons*/ createModels((struct ModelBuilder) {
             .instanceCount = 6,
             .texturesQuantity = 1,
-            .texturesPath = (const char *[]){
-                "textures/warrior1/high.jpg",
-            },
-            .modelPath = "models/my_model2d.obj",
+            .texturePointer = 3,
+            .texture = &textureDesc,
+            .modelPath = &actualModel[0],
             .vertexShader = "shaders/vert2d.spv",
             .fragmentShader = "shaders/frag2d.spv",
             .minDepth = 0.0f,
             .maxDepth = 1.0f
-        }), &vulkan->graphics),
-        warriors(instanceCount, &vulkan->graphics),
-        warriors(instanceCount, &vulkan->graphics),
-        warriors(instanceCount, &vulkan->graphics),
-        warriors(instanceCount, &vulkan->graphics),
-        warriors(instanceCount, &vulkan->graphics),
-        warriors(instanceCount, &vulkan->graphics),
+        }, &vulkan->graphics),
+        warriors(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        warriors(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        warriors(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        warriors(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        warriors(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        warriors(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
 
-        enemy(instanceCount, &vulkan->graphics),
-        enemy(instanceCount, &vulkan->graphics),
-        enemy(instanceCount, &vulkan->graphics),
-        enemy(instanceCount, &vulkan->graphics),
-        enemy(instanceCount, &vulkan->graphics),
-        enemy(instanceCount, &vulkan->graphics),
+        enemy(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        enemy(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        enemy(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        enemy(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        enemy(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
+        enemy(instanceCount, &vulkan->graphics, &textureDesc, &actualModel[2]),
     };
 
     struct Model floor = model[1];
@@ -293,4 +319,6 @@ void game(struct VulkanTools *vulkan, enum state *state) {
     freeArmy(&enemyArmy);
 
     destroyModelArray(sizeof(model) / sizeof(struct Model), model, &vulkan->graphics);
+    destroyActualModels(vulkan->graphics.device, sizeof(actualModel) / sizeof(struct actualModel), actualModel);
+    unloadTextures(vulkan->graphics.device, texturesQuantity, textureData, textureDesc);
 }

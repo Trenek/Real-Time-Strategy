@@ -11,6 +11,7 @@ add_subdirectory(dependencies)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(source)
 

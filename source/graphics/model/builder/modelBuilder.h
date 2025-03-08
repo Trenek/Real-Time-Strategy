@@ -3,12 +3,13 @@
 #include <vulkan/vulkan.h>
 
 struct Model;
+struct actualModel;
+struct Textures;
 
 struct ModelBuilder {
-    const char *modelPath;
-
+    struct descriptor *texture;
+    uint32_t texturePointer;
     uint32_t texturesQuantity;
-    const char **texturesPath;
 
     const char *vertexShader;
     const char *fragmentShader;
@@ -18,7 +19,7 @@ struct ModelBuilder {
     float minDepth;
     float maxDepth;
 
-    void (*loadModel)(const char *objectPath, struct Model *model, VkDevice device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+    struct actualModel *modelPath;
 
     VkDescriptorSetLayout (*createDescriptorSetLayout)(VkDevice device);
     VkDescriptorPool (*createDescriptorPool)(VkDevice device);
@@ -34,7 +35,7 @@ void bindTextureBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevi
 
 VkDescriptorPool createObjectDescriptorPool(VkDevice device);
 VkDescriptorSetLayout createObjectDescriptorSetLayout(VkDevice device);
-void bindObjectBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, struct Model model);
+void bindObjectBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, struct Model model, struct actualModel *actualModel);
 
 VkDescriptorPool createCameraDescriptorPool(VkDevice device);
 VkDescriptorSetLayout createCameraDescriptorSetLayout(VkDevice device);

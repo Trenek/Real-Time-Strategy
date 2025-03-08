@@ -64,11 +64,11 @@ VkDescriptorPool createObjectDescriptorPool(VkDevice device) {
     return descriptorPool;
 }
 
-void bindObjectBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, struct Model model) {
+void bindObjectBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevice device, struct Model model, struct actualModel *actualModel) {
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
         VkDescriptorBufferInfo modelBufferInfo[] = {
             {
-                .buffer = model.graphics.uniformModelBuffers[i],
+                .buffer = model.graphics.uniformModel.buffers[i],
                 .offset = 0,
                 .range = model.instanceCount * sizeof(struct instanceBuffer)
             }
@@ -76,9 +76,9 @@ void bindObjectBuffersToDescriptorSets(VkDescriptorSet descriptorSets[], VkDevic
 
         VkDescriptorBufferInfo meshBufferInfo[] = {
             {
-                .buffer = model.graphics.localMeshBuffers[i],
+                .buffer = actualModel->localMesh.buffers[i],
                 .offset = 0,
-                .range = model.meshQuantity * sizeof(mat4)
+                .range = actualModel->meshQuantity * sizeof(mat4)
             }
         };
 
